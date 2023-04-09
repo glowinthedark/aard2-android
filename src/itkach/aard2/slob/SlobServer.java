@@ -207,9 +207,13 @@ public class SlobServer extends Thread {
             @Nullable
             String blobId = uri.getQueryParameter("blob");
             if (blobId != null) {
-                Slob.Content content = slob.getContent(blobId);
-                respondWithBlobContent(out, content, "max-age=31556926", null);
-                return;
+                try {
+                    Slob.Content content = slob.getContent(blobId);
+                    respondWithBlobContent(out, content, "max-age=31556926", null);
+                    return;
+                } catch (AssertionError e) {
+                    // AssertionError occurs if the blobId is invalid
+                }
             }
             if (getEtag(slob.getId()).equals(ifNoneMatch)) {
                 respondWithNotModified(out);
