@@ -175,14 +175,13 @@ public final class SlobHelper {
         return result.toArray(new Slob[0]);
     }
 
-
     @NonNull
     public Uri getHttpUri(@NonNull Slob.Blob blob) {
         // http://host:port/<auth>/<slob-id>/<key>?blob=<blob-id>#<fragment>
         return new Uri.Builder()
                 .scheme("http")
                 .authority(LOCALHOST + ":" + port)
-                .appendPath("slob")
+                .appendPath(SlobServer.getAuthKey())
                 .appendPath(blob.owner.getId().toString())
                 .appendPath(blob.key)
                 .appendQueryParameter("blob", blob.id)

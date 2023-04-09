@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.Channels;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -30,8 +31,8 @@ import itkach.aard2.SlobHelper;
 import itkach.slob.Slob;
 
 // With this server, we only serve the resources with authentication
-// Format: host:port/slob/slobId/key?blob=<id>#fragment
-// Format: host:port/slob/uri/key#fragment
+// Format: host:port/auth/slobId/key?blob=<id>#fragment
+// Format: host:port/auth/uri/key#fragment
 // Returns: Content with designated types and caching info.
 //
 // Caching:
@@ -76,19 +77,26 @@ public class SlobServer extends Thread {
 
     private static final String SERVER_NAME = "SlobServer/1.0";
 
-    private static ServerSocket serverSocket;
-    private static boolean started = true;
+    private static final Object sLock = new Object();
+    @Nullable
+    private static SlobServer sSlobServer;
 
+    @NonNull
+    private final ServerSocket serverSocket;
+    @NonNull
+    private final String authKey;
     private final boolean keepAlive = true;
 
-    public SlobServer(final String ip, final int port) throws IOException {
+    public SlobServer(@NonNull String ip, int port) throws IOException {
         serverSocket = new ServerSocket(port, 100, InetAddress.getByName(ip));
         serverSocket.setSoTimeout(5000);
+        authKey = generateAuthKey();
+        setDaemon(true);
     }
 
     @Override
     public void run() {
-        while (started) {
+        while (!isInterrupted()) {
             try {
                 // Wait for new connection
                 Socket newSocket = serverSocket.accept();
@@ -97,6 +105,11 @@ public class SlobServer extends Thread {
             } catch (IOException ignore) {
             }
             // Loop continues as long as the server runs
+        }
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -185,7 +198,7 @@ public class SlobServer extends Thread {
             return;
         }
         String auth = pathSegments.get(0);
-        if (!"slob".equals(auth)) {
+        if (!authKey.equals(auth)) {
             // Invalid auth
             respondWithBadRequest(out);
             return;
@@ -346,19 +359,59 @@ public class SlobServer extends Thread {
     }
 
     public static void startServer(String ip, int port) throws IOException {
-        started = true;
-        Thread t = new SlobServer(ip, port);
-        t.start();
-        System.out.println("Server Started");
+        synchronized (sLock) {
+            if (sSlobServer != null && sSlobServer.isAlive()) {
+                // Server active
+                return;
+            }
+            sSlobServer = new SlobServer(ip, port);
+            sSlobServer.start();
+            System.out.println("Server Started");
+        }
     }
 
-    public static void stopServer() throws IOException {
-        if (!started) {
-            return;
+    public static void stopServer() {
+        synchronized (sLock) {
+            if (sSlobServer != null && sSlobServer.isAlive()) {
+                sSlobServer.interrupt();
+            }
+            System.out.println("Server stopped");
         }
-        started = false;
-        serverSocket.close();
-        System.out.println("Server stopped");
+    }
+
+    @Nullable
+    public static String getAuthKey() {
+        synchronized (sLock) {
+            if (sSlobServer != null) {
+                return sSlobServer.authKey;
+            }
+        }
+        return null;
+    }
+
+    @NonNull
+    private static String generateAuthKey() {
+        SecureRandom rand = new SecureRandom();
+        byte[] authBytes = new byte[rand.nextInt(16) + 5];
+        rand.nextBytes(authBytes);
+        return new String(encodeToHex(authBytes, 0, authBytes.length));
+    }
+
+    private static final char[] DIGITS = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+    };
+
+    @NonNull
+    private static char[] encodeToHex(@NonNull byte[] data, int offset, int len) {
+        char[] result = new char[len * 2];
+        for (int i = 0; i < len; i++) {
+            byte b = data[offset + i];
+            int resultIndex = 2 * i;
+            result[resultIndex] = (DIGITS[(b >> 4) & 0x0f]);
+            result[resultIndex + 1] = (DIGITS[b & 0x0f]);
+        }
+
+        return result;
     }
 
     private static class Request {
