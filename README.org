@@ -126,7 +126,6 @@
    mkdir aard2
    cd aard2
    git clone https://github.com/itkach/slobj.git
-   git clone https://github.com/itkach/slobber.git
    git clone https://github.com/itkach/aard2-android.git
    #+END_SRC
 
