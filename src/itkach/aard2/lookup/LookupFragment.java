@@ -1,5 +1,6 @@
 package itkach.aard2.lookup;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -7,18 +8,23 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import itkach.aard2.Application;
 import itkach.aard2.BaseListFragment;
+import itkach.aard2.MainActivity;
 import itkach.aard2.R;
 import itkach.aard2.SlobHelper;
+import itkach.aard2.article.ArticleCollectionActivity;
 import itkach.aard2.prefs.AppPrefs;
 import itkach.aard2.utils.ClipboardUtils;
+import itkach.slob.Slob;
 
 public class LookupFragment extends BaseListFragment implements LookupListener, SearchView.OnQueryTextListener {
     private final static String TAG = LookupFragment.class.getSimpleName();
@@ -54,6 +60,32 @@ public class LookupFragment extends BaseListFragment implements LookupListener, 
         recyclerView.setAdapter(listAdapter);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        FragmentActivity activity = requireActivity();
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).displayFab(R.drawable.ic_auto_awesome, R.string.action_open_random_article, v -> {
+                Slob.Blob blob = SlobHelper.getInstance().findRandom();
+                if (blob == null) {
+                    Toast.makeText(activity, R.string.article_collection_nothing_found, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Intent intent = new Intent(activity, ArticleCollectionActivity.class);
+                intent.setData(SlobHelper.getInstance().getHttpUri(blob));
+                startActivity(intent);
+            });
+        }
+    }
+
+    @Override
+    public void onPause() {
+        FragmentActivity activity = requireActivity();
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).hideFab();
+        }
+        super.onPause();
+    }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {

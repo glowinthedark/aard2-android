@@ -1,17 +1,16 @@
 package itkach.aard2;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -19,9 +18,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
-
-import java.util.Objects;
 
 import itkach.aard2.article.ArticleCollectionActivity;
 import itkach.aard2.dictionaries.DictionaryListFragment;
@@ -30,7 +28,6 @@ import itkach.aard2.prefs.AppPrefs;
 import itkach.aard2.prefs.SettingsFragment;
 import itkach.aard2.utils.ClipboardUtils;
 import itkach.aard2.utils.Utils;
-import itkach.slob.Slob;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener,
         ViewPager.OnPageChangeListener {
@@ -38,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private AppSectionsPagerAdapter appSectionsPagerAdapter;
     private ViewPager viewPager;
     private BottomNavigationView bottomNavigationView;
+    private FloatingActionButton fab;
     private int oldPosition = -1;
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,11 +46,6 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         appSectionsPagerAdapter = new AppSectionsPagerAdapter(getSupportFragmentManager());
 
-        final ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.aard2);
-        actionBar.setHomeActionContentDescription(R.string.action_open_random_article);
-
         viewPager = findViewById(R.id.pager);
         viewPager.setOffscreenPageLimit(appSectionsPagerAdapter.getCount());
         viewPager.setAdapter(appSectionsPagerAdapter);
@@ -60,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnItemSelectedListener(this);
+
+        fab = findViewById(R.id.fab);
 
         if (savedInstanceState != null) {
             onRestoreInstanceState(savedInstanceState);
@@ -134,22 +129,6 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            Slob.Blob blob = SlobHelper.getInstance().findRandom();
-            if (blob == null) {
-                Toast.makeText(this, R.string.article_collection_nothing_found, Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            Intent intent = new Intent(this, ArticleCollectionActivity.class);
-            intent.setData(SlobHelper.getInstance().getHttpUri(blob));
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     protected void onPause() {
         //Looks like shown soft input sometimes causes a system ui visibility
         //change event that breaks article activity launched from here out of full screen mode.
@@ -176,6 +155,17 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             }
         }
         super.onBackPressed();
+    }
+
+    public void displayFab(@DrawableRes int icon, @StringRes int description, View.OnClickListener listener) {
+        fab.setImageResource(icon);
+        fab.setContentDescription(getString(description));
+        fab.setOnClickListener(listener);
+        fab.show();
+    }
+
+    public void hideFab() {
+        fab.hide();
     }
 
     public static final class BookmarksFragment extends BlobDescriptorListFragment {

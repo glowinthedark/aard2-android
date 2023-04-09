@@ -6,12 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -19,15 +14,14 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.button.MaterialButton;
-
 import itkach.aard2.BaseListFragment;
+import itkach.aard2.MainActivity;
 import itkach.aard2.R;
-import itkach.aard2.descriptor.SlobDescriptor;
 import itkach.aard2.SlobHelper;
+import itkach.aard2.descriptor.SlobDescriptor;
 
 public class DictionaryListFragment extends BaseListFragment {
     private final static String TAG = DictionaryListFragment.class.getSimpleName();
@@ -78,29 +72,22 @@ public class DictionaryListFragment extends BaseListFragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View result = super.onCreateView(inflater, container, savedInstanceState);
-        View extraEmptyView = inflater.inflate(R.layout.dictionaries_empty_view_extra, container, false);
-        MaterialButton btn = extraEmptyView.findViewById(R.id.action_add_dictionaries);
-        btn.setOnClickListener(v -> selectDictionaryFiles());
-        LinearLayoutCompat emptyViewLayout = emptyView.findViewById(R.id.container);
-        emptyViewLayout.addView(extraEmptyView);
-        return result;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.dictionaries, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_add_dictionaries) {
-            selectDictionaryFiles();
-            return true;
+    public void onResume() {
+        super.onResume();
+        FragmentActivity activity = requireActivity();
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).displayFab(R.drawable.ic_add, R.string.action_add_dictionaries,
+                    v -> selectDictionaryFiles());
         }
-        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPause() {
+        FragmentActivity activity = requireActivity();
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).hideFab();
+        }
+        super.onPause();
     }
 
     private void selectDictionaryFiles() {
