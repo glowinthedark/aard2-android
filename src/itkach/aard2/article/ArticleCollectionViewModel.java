@@ -46,12 +46,12 @@ public class ArticleCollectionViewModel extends AndroidViewModel {
 
     public void loadBlobList(@NonNull Intent intent) {
         ThreadUtils.postOnBackgroundThread(() -> {
-            Uri articleUrl = intent.getData();
+            Uri articleUri = intent.getData();
             int currentPosition = intent.getIntExtra("position", 0);
             try {
                 BlobListWrapper result;
-                if (articleUrl != null) {
-                    result = createFromUri(articleUrl, intent);
+                if (articleUri != null) {
+                    result = createFromUri(articleUri, intent);
                 } else {
                     String action = intent.getAction();
                     if (action == null) {
@@ -86,7 +86,7 @@ public class ArticleCollectionViewModel extends AndroidViewModel {
     @Nullable
     private BlobListWrapper createFromUri(@NonNull Uri articleUrl, @NonNull Intent intent) {
         String host = articleUrl.getHost();
-        if (!(host.equals("localhost") || host.matches("127.\\d{1,3}.\\d{1,3}.\\d{1,3}"))) {
+        if (!(host.startsWith("localhost") || host.startsWith(SlobHelper.LOCALHOST))) {
             return createFromIntent(intent);
         }
         BlobDescriptor bd = BlobDescriptor.fromUri(articleUrl);
