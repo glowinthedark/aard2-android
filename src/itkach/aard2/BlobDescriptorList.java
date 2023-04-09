@@ -188,10 +188,9 @@ public final class BlobDescriptorList extends AbstractList<BlobDescriptor> {
         return blob;
     }
 
-    public BlobDescriptor createDescriptor(String contentUrl) {
-        Log.d(TAG, "Create descriptor from content url: " + contentUrl);
-        Uri uri = Uri.parse(contentUrl);
-        BlobDescriptor bd = BlobDescriptor.fromUri(uri);
+    private BlobDescriptor createDescriptor(Uri contentUri) {
+        Log.d(TAG, "Create descriptor from content url: " + contentUri);
+        BlobDescriptor bd = BlobDescriptor.fromUri(contentUri);
         if (bd != null) {
             String slobUri = SlobHelper.getInstance().getSlobUri(bd.slobId);
             Log.d(TAG, "Found slob uri for: " + bd.slobId + " " + slobUri);
@@ -200,7 +199,7 @@ public final class BlobDescriptorList extends AbstractList<BlobDescriptor> {
         return bd;
     }
 
-    public BlobDescriptor add(String contentUrl) {
+    public BlobDescriptor add(Uri contentUrl) {
         BlobDescriptor bd = createDescriptor(contentUrl);
         int index = this.list.indexOf(bd);
         if (index > -1) {
@@ -217,7 +216,7 @@ public final class BlobDescriptorList extends AbstractList<BlobDescriptor> {
         return bd;
     }
 
-    public BlobDescriptor remove(String contentUrl) {
+    public BlobDescriptor remove(Uri contentUrl) {
         int index = this.list.indexOf(createDescriptor(contentUrl));
         if (index > -1) {
             return removeByIndex(index);
@@ -247,7 +246,7 @@ public final class BlobDescriptorList extends AbstractList<BlobDescriptor> {
         return bd;
     }
 
-    public boolean contains(String contentUrl) {
+    public boolean contains(Uri contentUrl) {
         BlobDescriptor toFind = createDescriptor(contentUrl);
         for (BlobDescriptor bd : this.list) {
             if (bd.equals(toFind)) {

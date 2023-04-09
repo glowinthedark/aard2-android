@@ -1,6 +1,7 @@
 package itkach.aard2.article;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,12 +29,12 @@ import itkach.aard2.widget.ArticleWebView;
 
 
 public class ArticleFragment extends Fragment {
-    public static final String ARG_URL = "articleUrl";
+    public static final String ARG_URI = "uri";
 
     private ArticleWebView webView;
     private MenuItem bookmarkMenu;
     private MenuItem stylesMenu;
-    private String url;
+    private Uri url;
 
 
     @Override
@@ -122,7 +123,7 @@ public class ArticleFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         Bundle args = getArguments();
-        url = args == null ? null : args.getString(ARG_URL);
+        url = args == null ? null : args.getParcelable(ARG_URI);
         if (url == null) {
             View layout = inflater.inflate(R.layout.empty_view, container, false);
             ImageView icon = layout.findViewById(R.id.empty_icon);
@@ -139,7 +140,7 @@ public class ArticleFragment extends Fragment {
         }
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         webView.restoreState(savedInstanceState);
-        webView.loadUrl(url);
+        webView.loadUrl(url.toString());
         webView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, final int newProgress) {
                 final Activity activity = getActivity();

@@ -1,7 +1,6 @@
 package itkach.aard2;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -143,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 return true;
             }
             Intent intent = new Intent(this, ArticleCollectionActivity.class);
-            intent.setData(Uri.parse(SlobHelper.getInstance().getUrl(blob)));
+            intent.setData(SlobHelper.getInstance().getHttpUri(blob));
             startActivity(intent);
             return true;
         }

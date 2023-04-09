@@ -1,6 +1,7 @@
 package itkach.aard2;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -12,9 +13,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -23,14 +27,13 @@ import itkach.aard2.descriptor.DescriptorStore;
 import itkach.aard2.descriptor.SlobDescriptor;
 import itkach.aard2.lookup.LookupResult;
 import itkach.aard2.prefs.AppPrefs;
+import itkach.aard2.slob.SlobServer;
 import itkach.slob.Slob;
-import itkach.slobber.Slobber;
 
 public final class SlobHelper {
     public static final String TAG = SlobHelper.class.getSimpleName();
     public static final String LOCALHOST = "127.0.0.1";
-    public static final String CONTENT_URL_TEMPLATE = "http://" + LOCALHOST + ":%s%s";
-    public static final int PREFERRED_PORT = 8013;
+    public static final int PREFERRED_PORT = 8489;
 
     private static SlobHelper instance;
 
@@ -51,6 +54,9 @@ public final class SlobHelper {
     private final DescriptorStore<BlobDescriptor> historyStore;
     @NonNull
     private final DescriptorStore<SlobDescriptor> dictStore;
+    private final Map<String, Slob> slobMap = Collections.synchronizedMap(new HashMap<>());
+    private final List<Slob> slobs = Collections.synchronizedList(new ArrayList<>());
+    private final Random random;
 
     @NonNull
     public final BlobDescriptorList bookmarks;
@@ -61,7 +67,6 @@ public final class SlobHelper {
     @NonNull
     public final LookupResult lastLookupResult;
 
-    private Slobber slobber;
     private int port = -1;
     private volatile boolean initialized;
 
@@ -76,6 +81,7 @@ public final class SlobHelper {
         bookmarks = new BlobDescriptorList(bookmarkStore);
         history = new BlobDescriptorList(historyStore);
         lastLookupResult = new LookupResult();
+        random = new Random();
     }
 
     @WorkerThread
@@ -85,10 +91,9 @@ public final class SlobHelper {
         }
         initialized = true;
         long t0 = System.currentTimeMillis();
-        slobber = new Slobber();
         int portCandidate = PREFERRED_PORT;
         try {
-            slobber.start("127.0.0.1", portCandidate);
+            SlobServer.startServer(LOCALHOST, portCandidate);
             port = portCandidate;
         } catch (IOException e) {
             Log.w(TAG, String.format("Failed to start on preferred port %d", portCandidate), e);
@@ -106,7 +111,7 @@ public final class SlobHelper {
                 seen.add(portCandidate);
                 Exception lastError;
                 try {
-                    slobber.start("127.0.0.1", portCandidate);
+                    SlobServer.startServer(LOCALHOST, portCandidate);
                     port = portCandidate;
                     break;
                 } catch (IOException e1) {
@@ -127,15 +132,17 @@ public final class SlobHelper {
 
     public void updateSlobs() {
         checkInitialized();
-        slobber.setSlobs(null);
-        List<Slob> slobs = new ArrayList<>();
+        slobs.clear();
+        slobMap.clear();
         for (SlobDescriptor sd : dictionaries) {
             Slob s = sd.load(application);
             if (s != null) {
                 slobs.add(s);
             }
         }
-        slobber.setSlobs(slobs);
+        for (Slob s : slobs) {
+            slobMap.put(s.getId().toString(), s);
+        }
     }
 
     @NonNull
@@ -144,7 +151,7 @@ public final class SlobHelper {
         List<Slob> result = new ArrayList<>(dictionaries.size());
         for (SlobDescriptor sd : dictionaries) {
             if (sd.active) {
-                Slob s = slobber.getSlob(sd.id);
+                Slob s = slobMap.get(sd.id);
                 if (s != null) {
                     result.add(s);
                 }
@@ -159,7 +166,7 @@ public final class SlobHelper {
         List<Slob> result = new ArrayList<>(dictionaries.size());
         for (SlobDescriptor sd : dictionaries) {
             if (sd.active && sd.priority > 0) {
-                Slob s = slobber.getSlob(sd.id);
+                Slob s = slobMap.get(sd.id);
                 if (s != null) {
                     result.add(s);
                 }
@@ -170,29 +177,86 @@ public final class SlobHelper {
 
 
     @NonNull
-    public String getUrl(@NonNull Slob.Blob blob) {
-        return String.format(CONTENT_URL_TEMPLATE, port, Slobber.mkContentURL(blob));
+    public Uri getHttpUri(@NonNull Slob.Blob blob) {
+        // http://host:port/<auth>/<slob-id>/<key>?blob=<blob-id>#<fragment>
+        return new Uri.Builder()
+                .scheme("http")
+                .authority(LOCALHOST + ":" + port)
+                .appendPath("slob")
+                .appendPath(blob.owner.getId().toString())
+                .appendPath(blob.key)
+                .appendQueryParameter("blob", blob.id)
+                .fragment(blob.fragment)
+                .build();
     }
 
+    @Nullable
     public Slob getSlob(String slobId) {
         checkInitialized();
-        return slobber.getSlob(slobId);
+        return slobMap.get(slobId);
     }
 
-    public Slob findSlob(String slobOrUri) {
+    @Nullable
+    public Slob findSlob(String slobIdOrUri) {
         checkInitialized();
-        return slobber.findSlob(slobOrUri);
+        Slob slob = getSlob(slobIdOrUri);
+        return slob != null ? slob : findSlobByUri(slobIdOrUri);
     }
 
+    @Nullable
+    public Slob findSlobByUri(String slobURI) {
+        checkInitialized();
+        for (Slob s : slobs) {
+            if (s.getURI().equals(slobURI)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    @NonNull
+    public List<Slob> findSlobsByUri(String uri) {
+        checkInitialized();
+        List<Slob> result = new ArrayList<>();
+        for (Slob s : slobs) {
+            if (s.getURI().equals(uri)) {
+                result.add(s);
+            }
+        }
+        return result;
+    }
+
+    @Nullable
     public String getSlobUri(String slobId) {
         checkInitialized();
-        return slobber.getSlobURI(slobId);
+        Slob slob = getSlob(slobId);
+        return slob != null ? slob.getURI() : null;
     }
 
+    @Nullable
     public Slob.Blob findRandom() {
         checkInitialized();
         Slob[] slobs = AppPrefs.useOnlyFavoritesForRandomLookups() ? getFavoriteSlobs() : getActiveSlobs();
-        return slobber.findRandom(slobs);
+        Set<String> types = new HashSet<>(2);
+        types.add("text/html");
+        types.add("text/plain");
+        return findRandom(types, slobs);
+    }
+
+    @Nullable
+    private Slob.Blob findRandom(@NonNull Set<String> allowedContentTypes, @NonNull Slob[] slobs) {
+        if (slobs.length > 0) {
+            for (int i = 0; i < 100; i++) {
+                Slob slob = slobs[random.nextInt(slobs.length)];
+                int size = slob.size();
+                Slob.Blob blob = slob.get(random.nextInt(size));
+                String contentType = getMimeType(blob.getContentType());
+                if (allowedContentTypes.contains(contentType)) {
+                    return blob;
+                }
+            }
+        }
+        return null;
     }
 
     @NonNull
@@ -217,8 +281,8 @@ public final class SlobHelper {
                                                   @Nullable Slob.Strength upToStrength) {
         checkInitialized();
         long t0 = System.currentTimeMillis();
-        Slob[] slobs = activeOnly ? getActiveSlobs() : slobber.getSlobs();
-        Slob.PeekableIterator<Slob.Blob> result = Slob.find(key, slobs, slobber.findSlob(preferredSlobId), upToStrength);
+        Slob[] slobs = activeOnly ? getActiveSlobs() : this.slobs.toArray(new Slob[0]);
+        Slob.PeekableIterator<Slob.Blob> result = Slob.find(key, slobs, findSlob(preferredSlobId), upToStrength);
         Log.d(TAG, String.format("find ran in %dms", System.currentTimeMillis() - t0));
         return result;
     }
@@ -227,5 +291,11 @@ public final class SlobHelper {
         if (!initialized) {
             throw new IllegalStateException("SlobHelper not initialized. Make sure to call init() first!");
         }
+    }
+
+    @NonNull
+    private static String getMimeType(@NonNull String contentType) {
+        int semiColon = contentType.indexOf(';');
+        return (semiColon == -1 ? contentType : contentType.substring(0, semiColon)).trim();
     }
 }

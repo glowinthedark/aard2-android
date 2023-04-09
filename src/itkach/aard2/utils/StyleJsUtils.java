@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
 import itkach.aard2.Application;
 
@@ -17,8 +16,7 @@ public final class StyleJsUtils {
     @NonNull
     public static String getStyleSwitcherJs() {
         if (styleSwitcherJs == null) {
-            try (InputStream is = Objects.requireNonNull(StyleJsUtils.class.getClassLoader())
-                    .getResourceAsStream("styleswitcher.js")) {
+            try (InputStream is = Application.get().getAssets().open("styleswitcher.js")) {
                 styleSwitcherJs = Utils.readStream(is, 0);
             } catch (IOException e) {
                 styleSwitcherJs = "";

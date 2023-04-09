@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -151,7 +152,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
             String dictLabel = blob.owner.getTags().get(SlobTags.TAG_LABEL);
             actionBar.setTitle(dictLabel);
             SlobHelper slobHelper = SlobHelper.getInstance();
-            slobHelper.history.add(slobHelper.getUrl(blob));
+            slobHelper.history.add(slobHelper.getHttpUri(blob));
         } else {
             actionBar.setTitle("???");
         }
@@ -358,9 +359,9 @@ public class ArticleCollectionActivity extends AppCompatActivity
 
             Slob.Blob blob = get(i);
             if (blob != null) {
-                String articleUrl = SlobHelper.getInstance().getUrl(blob);
+                Uri articleUri = SlobHelper.getInstance().getHttpUri(blob);
                 Bundle args = new Bundle();
-                args.putString(ArticleFragment.ARG_URL, articleUrl);
+                args.putParcelable(ArticleFragment.ARG_URI, articleUri);
                 fragment.setArguments(args);
             }
             return fragment;
