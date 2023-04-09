@@ -3,6 +3,7 @@ package itkach.aard2;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
@@ -102,7 +103,7 @@ public final class BlobDescriptorList extends AbstractList<BlobDescriptor> {
     @MainThread
     public void notifyDataSetChanged() {
         this.filteredList.clear();
-        if (filter == null || filter.length() == 0) {
+        if (TextUtils.isEmpty(filter)) {
             this.filteredList.addAll(this.list);
         } else {
             for (BlobDescriptor bd : this.list) {
