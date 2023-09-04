@@ -72,12 +72,15 @@ android {
         versionName "0.54"
     }
 
+    packagingOptions {
+        exclude 'META-INF/*.version'
+    }
 }
 
 dependencies {
     api project(':slobj')
 
-    implementation "com.google.android.material:material:1.8.0"
+    implementation "com.google.android.material:material:1.9.0"
     implementation "androidx.appcompat:appcompat:1.6.1"
     // Fix duplicate classes issue in material
     configurations {
@@ -85,7 +88,7 @@ dependencies {
             exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
         }
     }
-    implementation "androidx.webkit:webkit:1.6.1"
+    implementation "androidx.webkit:webkit:1.7.0"
 
     api 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
     api 'com.fasterxml.jackson.core:jackson-core:2.11.1'
