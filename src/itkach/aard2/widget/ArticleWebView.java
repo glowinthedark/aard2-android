@@ -2,6 +2,7 @@ package itkach.aard2.widget;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -21,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewClientCompat;
+import androidx.webkit.WebViewFeature;
 
 import com.google.android.material.color.MaterialColors;
 
@@ -114,8 +116,21 @@ public class ArticleWebView extends SearchableWebView {
         settings.setJavaScriptEnabled(!ArticleViewPrefs.disableJavaScript());
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
+
+
         if (ArticleViewPrefs.enableForceDark()) {
-            WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true);
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+
+                WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true);
+            } else {
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                    int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+                    if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+                        //Theme is switched to Night/Dark mode, turn on webview darkening
+                        WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON);
+                    }
+                }
+            }
         }
 
         Resources r = getResources();
