@@ -154,7 +154,6 @@ public class ArticleWebView extends SearchableWebView {
         };
 
         setWebViewClient(new WebViewClient());
-
         setOnLongClickListener(view -> {
             HitTestResult hitTestResult = getHitTestResult();
             int resultType = hitTestResult.getType();
@@ -175,6 +174,7 @@ public class ArticleWebView extends SearchableWebView {
                     return true;
                 }
             }
+
             return false;
         });
 

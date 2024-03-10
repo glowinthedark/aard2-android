@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application' version '7.4.0'
+    id 'com.android.application' version '7.4.2'
 }
 
 repositories {
@@ -68,8 +68,9 @@ android {
         applicationId "itkach.aard2"
         minSdk 21
         targetSdk 33
-        versionCode 54
-        versionName "0.54"
+        versionCode 56
+        versionName "0.56"
+        applicationIdSuffix 'darkmod'
     }
 
     packagingOptions {
@@ -89,7 +90,7 @@ dependencies {
         }
     }
     implementation "androidx.webkit:webkit:1.7.0"
-
+//    implementation "androidx.webkit:webkit:1.10.0"
     api 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
     api 'com.fasterxml.jackson.core:jackson-core:2.11.1'
     api 'com.fasterxml.jackson.core:jackson-annotations:2.11.1'
