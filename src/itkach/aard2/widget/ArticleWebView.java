@@ -41,6 +41,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 
+import itkach.aard2.Application;
 import itkach.aard2.R;
 import itkach.aard2.SlobHelper;
 import itkach.aard2.article.ArticleCollectionActivity;
@@ -304,6 +305,12 @@ public class ArticleWebView extends SearchableWebView {
         applyStylePref.cancel();
     }
 
+    @JavascriptInterface
+    public void onWordTapped(String tappedWord) {
+        Log.d(TAG, "Word tapped! " + tappedWord);
+        Application.get().lookupAsync(tappedWord);
+    }
+
     public void applyStylePref() {
         String styleTitle = getPreferredStyle();
         setStyle(styleTitle);
@@ -449,7 +456,8 @@ public class ArticleWebView extends SearchableWebView {
             } else {
                 Log.w(TAG, "onPageFinished: Unexpected page finished event for " + url);
             }
-            view.loadUrl("javascript:" + StyleJsUtils.getStyleSwitcherJs() + ";$SLOB.setStyleTitles($styleSwitcher.getTitles())");
+            view.loadUrl("javascript:" + StyleJsUtils.getStyleSwitcherJs() + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());" +
+                    "document.onclick=function(o){var e=window.getSelection();e.modify('extend','left','word');var t=e.toString();e.modify('extend','right','word');var d=t+e.toString();e.removeAllRanges(),$SLOB.onWordTapped(d)};");
             applyStylePref();
         }
 
