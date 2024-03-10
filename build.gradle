@@ -48,7 +48,7 @@ android {
                 if (keyPassword == null) {
                     keyPassword = storePassword
                 }
-                keyAlias "aard2-android"
+                keyAlias System.getenv("KEY_ALIAS")
             }
         }
     }
