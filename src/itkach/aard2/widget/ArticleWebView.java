@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
@@ -308,7 +309,10 @@ public class ArticleWebView extends SearchableWebView {
     @JavascriptInterface
     public void onWordTapped(String tappedWord) {
         Log.d(TAG, "Word tapped! " + tappedWord);
-        Application.get().lookupAsync(tappedWord);
+
+        if (!TextUtils.isEmpty(tappedWord) && tappedWord.length() > 1) {
+            Application.get().lookupAsync(tappedWord);
+        }
     }
 
     public void applyStylePref() {
@@ -457,7 +461,7 @@ public class ArticleWebView extends SearchableWebView {
                 Log.w(TAG, "onPageFinished: Unexpected page finished event for " + url);
             }
             view.loadUrl("javascript:" + StyleJsUtils.getStyleSwitcherJs() + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());" +
-                    "document.onclick=function(o){var e=window.getSelection();e.modify('extend','left','word');var t=e.toString();e.modify('extend','right','word');var d=t+e.toString();e.removeAllRanges(),$SLOB.onWordTapped(d)};");
+                    "(function(){document.onclick=function(e){if(['BODY','A','IMG','BUTTON','INPUT','FIGURE'].indexOf(e.target.tagName)!=-1||e.target.closest('a')){console.log(`SKIP ${e.target.tagName}`);return}var selection=window.getSelection();selection.modify('extend','left','word');var left=selection.toString();selection.modify('extend','right','word');selection.modify('extend','right','word');var right=selection.toString().split(/[\\s'\"!\"#$%&\\'()*+,./:;<=>?@\\[\\]^_\\`{|}~\\s\\t\\r\\n!?.,;:<>'‘’‚‛“”„‟‹›❮❯]/)[0];var word=left+right;selection.removeAllRanges();if(word&&word.length>1){$SLOB.onWordTapped(word)}}})();");
             applyStylePref();
         }
 
