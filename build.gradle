@@ -14,8 +14,6 @@ android {
     compileSdkVersion 31
 
     packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
         project("slobj").file("exclude.txt").eachLine {
             line ->
                 println line
@@ -23,12 +21,11 @@ android {
                     exclude line.trim()
                 }
         }
+        resources {
+            excludes += ['META-INF/LICENSE', 'META-INF/NOTICE']
+        }
     }
 
-
-    lintOptions {
-        abortOnError false
-    }
 
     sourceSets {
         main {
@@ -64,11 +61,18 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 34
+        versionName "0.57"
+        versionCode  57
+        applicationId "itkach.aard2"
+    }
+    lint {
+        abortOnError false
     }
 
 }
 
 dependencies {
+    implementation "androidx.webkit:webkit:1.9.0"
     api 'com.fasterxml.jackson.core:jackson-databind:2.4+'
     api 'com.fasterxml.jackson.core:jackson-core:2.4+'
     api 'com.fasterxml.jackson.core:jackson-annotations:2.4+'
