@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application' version '7.4.2'
+    id 'com.android.application' version '7.3.0'
 }
 
 repositories {
@@ -11,7 +11,8 @@ repositories {
 }
 
 android {
-    compileSdkVersion 31
+    namespace "itkach.aard2"
+    compileSdkVersion 34
 
     packagingOptions {
         project("slobj").file("exclude.txt").eachLine {
@@ -59,7 +60,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 34
         versionName "0.57"
         versionCode  57
@@ -72,7 +73,10 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.android.material:material:1.12.0'
     implementation "androidx.webkit:webkit:1.9.0"
+    implementation "androidx.core:core:1.13.1"
+    implementation "androidx.appcompat:appcompat:1.7.0"
     api 'com.fasterxml.jackson.core:jackson-databind:2.4+'
     api 'com.fasterxml.jackson.core:jackson-core:2.4+'
     api 'com.fasterxml.jackson.core:jackson-annotations:2.4+'

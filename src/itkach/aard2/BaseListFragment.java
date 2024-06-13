@@ -1,7 +1,7 @@
 package itkach.aard2;
 
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import androidx.core.app.ListFragment;
 import android.text.method.LinkMovementMethod;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
