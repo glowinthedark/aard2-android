@@ -1,7 +1,7 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/action_lookup"
-          android:title="@string/action_lookup"
-          android:showAsAction="always"
-          android:actionLayout="@layout/action_lookup"
-          />
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/fldLookup"
+        app:showAsAction="always"
+        android:title="@string/action_lookup"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 </menu>

@@ -5,7 +5,6 @@
         android:paddingLeft="8dip"
         android:paddingRight="8dip"
         android:paddingTop="3dip"
-        android:background="@android:drawable/list_selector_background"
     >
     
     <LinearLayout
@@ -21,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="22dp"
-            android:text="Босния и Герцеговина на зимних Олимпийских играх 1998"
+            android:text=""
             android:textSize="20sp" />
 
         <LinearLayout

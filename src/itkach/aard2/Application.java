@@ -16,6 +16,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.webkit.WebView;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -243,13 +245,22 @@ public class Application extends android.app.Application {
     }
 
     void installTheme(Activity activity) {
-        String theme = getPreferredTheme();
+        String theme = prefs().getString(Application.PREF_UI_THEME,
+                Application.PREF_UI_THEME_SYSTEM);
+//            activity.setTheme(android.R.style.Theme_Material);
         if (theme.equals(PREF_UI_THEME_DARK)) {
-            activity.setTheme(android.R.style.Theme_Holo);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else if (theme.equals(PREF_UI_THEME_LIGHT)) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+
         }
-        else {
-            activity.setTheme(android.R.style.Theme_Holo_Light_DarkActionBar);
-        }
+//        if (theme.equals(PREF_UI_THEME_DARK)) {
+//        }
+//        else {
+//            activity.setTheme(android.R.style.Theme_Material_Light);
+//        }
     }
 
     void push(Activity activity) {

@@ -1,8 +1,8 @@
-<SearchView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.SearchView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fldFilter"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:actionViewClass="android.widget.SearchView"
+    android:actionViewClass="androidx.appcompat.widget.SearchView"
     android:iconifiedByDefault="true"
     android:queryHint="Filter"
     android:showAsAction="always" />

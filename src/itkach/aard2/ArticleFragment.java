@@ -7,7 +7,10 @@ import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.core.app.Fragment;
+
+import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.fragment.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,9 +18,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
@@ -38,7 +41,7 @@ public class ArticleFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Activity activity = getActivity();
-        Context context = activity.getActionBar().getThemedContext();
+        Context context = activity.getApplicationContext();
         icBookmark =  IconMaker.actionBar(context, IconMaker.IC_BOOKMARK);
         icBookmarkO = IconMaker.actionBar(context, IconMaker.IC_BOOKMARK_O);
         icFullscreen = IconMaker.actionBar(context, IconMaker.IC_FULLSCREEN);
@@ -110,7 +113,8 @@ public class ArticleFragment extends Fragment {
             return true;
         }
         if (itemId == R.id.action_load_remote_content) {
-            view.forceLoadRemoteContent = true;
+            view.forceLoadRemoteContent = !view.forceLoadRemoteContent;
+            view.getSettings().setCacheMode(view.forceLoadRemoteContent ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
             view.reload();
             return true;
         }
@@ -150,7 +154,7 @@ public class ArticleFragment extends Fragment {
         }
 
         View layout = inflater.inflate(R.layout.article_view, container, false);
-        final ProgressBar progressBar = (ProgressBar) layout.findViewById(R.id.webViewPogress);
+        final ContentLoadingProgressBar progressBar = (ContentLoadingProgressBar) layout.findViewById(R.id.webViewProgress);
         view = (ArticleWebView) layout.findViewById(R.id.webView);
         view.restoreState(savedInstanceState);
         view.loadUrl(url);

@@ -1,6 +1,5 @@
 package itkach.aard2;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -10,15 +9,20 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.core.app.Fragment;
-import androidx.core.app.FragmentActivity;
-import androidx.core.app.FragmentManager;
-import androidx.core.app.FragmentStatePagerAdapter;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 import androidx.core.app.TaskStackBuilder;
-import androidx.core.view.PagerTitleStrip;
-import androidx.core.view.ViewPager;
-import androidx.core.view.ViewPager.OnPageChangeListener;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerTitleStrip;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -29,13 +33,16 @@ import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
 
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+
 import java.util.Iterator;
 import java.util.List;
 
 import itkach.slob.Slob;
 import itkach.slob.Slob.Blob;
 
-public class ArticleCollectionActivity extends FragmentActivity
+public class ArticleCollectionActivity extends AppCompatActivity
         implements  View.OnSystemUiVisibilityChangeListener,
                     SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -45,7 +52,7 @@ public class ArticleCollectionActivity extends FragmentActivity
     static final String PREF_FULLSCREEN = "fullscreen";
 
     ArticleCollectionPagerAdapter articleCollectionPagerAdapter;
-    ViewPager viewPager;
+    ViewPager2 viewPager;
 
 
     class ToBlobWithFragment implements ToBlob {
@@ -80,10 +87,10 @@ public class ArticleCollectionActivity extends FragmentActivity
         requestWindowFeature(Window.FEATURE_PROGRESS);
         final Application app = (Application)getApplication();
         app.installTheme(this);
-        getActionBar().hide();
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_article_collection_loading);
         app.push(this);
-        final ActionBar actionBar = getActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setSubtitle("...");
         final Intent intent = getIntent();
@@ -132,7 +139,7 @@ public class ArticleCollectionActivity extends FragmentActivity
                     return;
                 }
                 articleCollectionPagerAdapter = adapter;
-                if (articleCollectionPagerAdapter == null || articleCollectionPagerAdapter.getCount() == 0) {
+                if (articleCollectionPagerAdapter == null || articleCollectionPagerAdapter.getItemCount() == 0) {
                     int messageId;
                     if (articleCollectionPagerAdapter == null) {
                         messageId = R.string.article_collection_invalid_link;
@@ -146,7 +153,7 @@ public class ArticleCollectionActivity extends FragmentActivity
                     return;
                 }
 
-                if (position > articleCollectionPagerAdapter.getCount() - 1) {
+                if (position > articleCollectionPagerAdapter.getItemCount() - 1) {
                     Toast.makeText(ArticleCollectionActivity.this, R.string.article_collection_selected_not_available,
                             Toast.LENGTH_SHORT).show();
                     finish();
@@ -155,12 +162,20 @@ public class ArticleCollectionActivity extends FragmentActivity
 
                 setContentView(R.layout.activity_article_collection);
 
-                findViewById(R.id.pager_title_strip).setVisibility(
-                        articleCollectionPagerAdapter.getCount() == 1 ? ViewGroup.GONE : ViewGroup.VISIBLE);
+                TabLayout tabs = findViewById(R.id.tabs);
+                tabs.setVisibility(
+                        articleCollectionPagerAdapter.getItemCount() == 1 ? ViewGroup.GONE : ViewGroup.VISIBLE);
 
-                viewPager = (ViewPager) findViewById(R.id.pager);
+                viewPager = (ViewPager2) findViewById(R.id.pager);
                 viewPager.setAdapter(articleCollectionPagerAdapter);
-                viewPager.setOnPageChangeListener(new OnPageChangeListener(){
+                TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabs, viewPager, true, new TabLayoutMediator.TabConfigurationStrategy() {
+                    @Override
+                    public void onConfigureTab(TabLayout.Tab tab, int position) {
+                        tab.setText(articleCollectionPagerAdapter.getPageTitle(position));
+                    }
+                });
+                tabLayoutMediator.attach();
+                viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
 
                     @Override
                     public void onPageScrollStateChanged(int arg0) {}
@@ -171,24 +186,28 @@ public class ArticleCollectionActivity extends FragmentActivity
                     @Override
                     public void onPageSelected(final int position) {
                         updateTitle(position);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ArticleFragment fragment =(ArticleFragment) articleCollectionPagerAdapter.getItem(position);
-                                fragment.applyTextZoomPref();
-                            }
-                        });
+                        ArticleFragment fragment = articleCollectionPagerAdapter.getPageFragment(position);
+                        if (fragment != null) {
+                            articleCollectionPagerAdapter.setPrimaryItem(fragment);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+//                                ArticleFragment fragment =(ArticleFragment) articleCollectionPagerAdapter.createFragment(position);
+                                    fragment.applyTextZoomPref();
+                                }
+                            });
+                        }
 
                     }});
                 viewPager.setCurrentItem(position);
 
-                PagerTitleStrip titleStrip = (PagerTitleStrip)findViewById(R.id.pager_title_strip);
-                titleStrip.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+//                PagerTitleStrip titleStrip = (PagerTitleStrip)findViewById(R.id.pager_title_strip);
+//                titleStrip.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
                 updateTitle(position);
-                articleCollectionPagerAdapter.registerDataSetObserver(new DataSetObserver() {
+                articleCollectionPagerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                     @Override
                     public void onChanged() {
-                        if (articleCollectionPagerAdapter.getCount() == 0) {
+                        if (articleCollectionPagerAdapter.getItemCount() == 0) {
                             finish();
                         }
                     }
@@ -214,12 +233,12 @@ public class ArticleCollectionActivity extends FragmentActivity
         data.setData(result);
         boolean hasFragment = !Util.isBlank(bd.fragment);
         return new ArticleCollectionPagerAdapter(
-                app, data, hasFragment ? new ToBlobWithFragment(bd.fragment) : blobToBlob, getSupportFragmentManager());
+                app, data, hasFragment ? new ToBlobWithFragment(bd.fragment) : blobToBlob, this);
     };
 
     private ArticleCollectionPagerAdapter createFromLastResult(Application app) {
         return new ArticleCollectionPagerAdapter(
-                app, app.lastResult, blobToBlob, getSupportFragmentManager());
+                app, app.lastResult, blobToBlob, this);
     }
 
     private ArticleCollectionPagerAdapter createFromBookmarks(final Application app) {
@@ -229,7 +248,7 @@ public class ArticleCollectionActivity extends FragmentActivity
             public Blob convert(Object item) {
                 return app.bookmarks.resolve((BlobDescriptor)item);
             }
-        }, getSupportFragmentManager());
+        }, this);
     }
 
     private ArticleCollectionPagerAdapter createFromHistory(final Application app) {
@@ -239,7 +258,7 @@ public class ArticleCollectionActivity extends FragmentActivity
             public Blob convert(Object item) {
                 return app.history.resolve((BlobDescriptor)item);
             }
-        }, getSupportFragmentManager());
+        }, this);
     }
 
     private ArticleCollectionPagerAdapter createFromIntent(Application app, Intent intent) {
@@ -282,7 +301,7 @@ public class ArticleCollectionActivity extends FragmentActivity
             data.setData(result);
         }
         return new ArticleCollectionPagerAdapter(
-                app, data, blobToBlob, getSupportFragmentManager());
+                app, data, blobToBlob, this);
     }
 
     private Iterator<Blob> stemLookup(Application app, String lookupKey) {
@@ -312,11 +331,11 @@ public class ArticleCollectionActivity extends FragmentActivity
     }
 
     private void updateTitle(int position) {
-        Log.d("updateTitle", ""+position + " count: " + articleCollectionPagerAdapter.getCount());
+        Log.d("updateTitle", ""+position + " count: " + articleCollectionPagerAdapter.getItemCount());
         Slob.Blob blob = articleCollectionPagerAdapter.get(position);
         CharSequence pageTitle = articleCollectionPagerAdapter.getPageTitle(position);
         Log.d("updateTitle", ""+blob);
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (blob != null) {
             String dictLabel = blob.owner.getTags().get("label");
             actionBar.setTitle(dictLabel);
@@ -367,13 +386,13 @@ public class ArticleCollectionActivity extends FragmentActivity
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE
         );
-        getActionBar().hide();
+        getSupportActionBar().hide();
     }
 
     private void unFullScreen() {
         Log.d(TAG, "[F] unfullscreen");
         getWindow().getDecorView().setSystemUiVisibility(0);
-        getActionBar().show();
+        getSupportActionBar().show();
     }
 
     void toggleFullScreen() {
@@ -496,7 +515,7 @@ public class ArticleCollectionActivity extends FragmentActivity
                     boolean scrolled = webView.pageDown(false);
                     if (!scrolled) {
                         int current = viewPager.getCurrentItem();
-                        if (current < articleCollectionPagerAdapter.getCount() - 1) {
+                        if (current < articleCollectionPagerAdapter.getItemCount() - 1) {
                             viewPager.setCurrentItem(current + 1);
                         }
                     }
@@ -545,7 +564,7 @@ public class ArticleCollectionActivity extends FragmentActivity
         Slob.Blob convert(Object item);
     }
 
-    public static class ArticleCollectionPagerAdapter extends FragmentStatePagerAdapter {
+    public class ArticleCollectionPagerAdapter extends FragmentStateAdapter {
 
         private Application app;
         private DataSetObserver observer;
@@ -554,8 +573,8 @@ public class ArticleCollectionActivity extends FragmentActivity
         private int count;
         private ArticleFragment primaryItem;
 
-        public ArticleCollectionPagerAdapter(Application app, BaseAdapter data, ToBlob toBlob, FragmentManager fm) {
-            super(fm);
+        public ArticleCollectionPagerAdapter(Application app, BaseAdapter data, ToBlob toBlob, FragmentActivity activity) {
+            super(activity);
             this.app = app;
             this.data = data;
             this.count = data.getCount();
@@ -576,18 +595,17 @@ public class ArticleCollectionActivity extends FragmentActivity
             app = null;
         }
 
-        @Override
-        public void setPrimaryItem(ViewGroup container, int position, Object object) {
-            super.setPrimaryItem(container, position, object);
-            this.primaryItem = (ArticleFragment)object;
+        public void setPrimaryItem(ArticleFragment object) {
+            this.primaryItem = object;
         }
 
         ArticleFragment getPrimaryItem() {
             return this.primaryItem;
         }
 
+        @NonNull
         @Override
-        public Fragment getItem(int i) {
+        public Fragment createFragment(int i) {
             Fragment fragment = new ArticleFragment();
 
             Slob.Blob blob = get(i);
@@ -601,7 +619,7 @@ public class ArticleCollectionActivity extends FragmentActivity
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             return count;
         }
 
@@ -610,6 +628,18 @@ public class ArticleCollectionActivity extends FragmentActivity
         }
 
         @Override
+        public long getItemId(int position) {
+            // we override getItemId to ensure position is the id
+            // so that we can find a fragment based on a position
+            return position;
+        }
+
+        public ArticleFragment getPageFragment(long id) {
+            return (ArticleFragment) ArticleCollectionActivity.this.getSupportFragmentManager().findFragmentByTag("f" + Long.toString(id));
+        }
+
+
+        //        @Override
         public CharSequence getPageTitle(int position) {
             if (position < data.getCount()) {
                 Object item = data.getItem(position);
@@ -626,9 +656,9 @@ public class ArticleCollectionActivity extends FragmentActivity
         //this is needed so that fragment is properly updated
         //if underlying data changes (such as on unbookmark)
         //https://code.google.com/p/android/issues/detail?id=19001
-        @Override
-        public int getItemPosition(Object object) {
-            return POSITION_NONE;
-        }
+//        @Override
+//        public int getItemPosition(Object object) {
+//            return POSITION_NONE;
+//        }
     }
 }

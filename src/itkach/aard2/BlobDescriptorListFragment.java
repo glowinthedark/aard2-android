@@ -7,7 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.core.app.FragmentActivity;
+
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.FragmentActivity;
+
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -17,7 +20,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.SearchView;
 
 
 abstract class BlobDescriptorListFragment extends BaseListFragment {
@@ -170,10 +172,10 @@ abstract class BlobDescriptorListFragment extends BaseListFragment {
 
         miFilter = menu.findItem(R.id.action_filter);
         miFilter.setIcon(icFilter);
-
-        View filterActionView = miFilter.getActionView();
-        SearchView searchView = (SearchView) filterActionView
-                .findViewById(R.id.fldFilter);
+        SearchView searchView = (SearchView) miFilter.getActionView();
+//        View filterActionView = miFilter.getActionView();
+//        SearchView searchView = (SearchView) filterActionView
+//                .findViewById(R.id.fldFilter);
         searchView.setQueryHint(miFilter.getTitle());
         searchView.setQuery(list.getFilter(), true);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

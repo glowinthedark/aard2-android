@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.net.Uri;
-import androidx.core.provider.DocumentFile;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +21,8 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import static java.lang.String.format;
+
+import androidx.documentfile.provider.DocumentFile;
 
 public class DictionaryListAdapter extends BaseAdapter {
 

@@ -8,7 +8,6 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.core.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.fragment.app.FragmentActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,9 +59,9 @@ public class DictionariesFragment extends BaseListFragment {
         View result = super.onCreateView(inflater, container, savedInstanceState);
         View extraEmptyView = inflater.inflate(R.layout.dictionaries_empty_view_extra, container, false);
         Button btn = extraEmptyView.findViewById(R.id.dictionaries_empty_btn_scan);
-        btn.setCompoundDrawablesWithIntrinsicBounds(
-                IconMaker.list(getActivity(), IconMaker.IC_ADD),
-                null, null, null);
+//        btn.setCompoundDrawablesWithIntrinsicBounds(
+//                IconMaker.list(getActivity(), IconMaker.IC_ADD),
+//                null, null, null);
         btn.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View v) {

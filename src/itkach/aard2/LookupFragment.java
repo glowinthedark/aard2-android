@@ -10,8 +10,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
+
+import androidx.appcompat.widget.SearchView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,7 +20,7 @@ import java.util.TimerTask;
 public class LookupFragment extends BaseListFragment implements LookupListener {
 
     private Timer       timer;
-    private SearchView  searchView;
+    private SearchView searchView;
     private Application app;
     private SearchView.OnQueryTextListener queryTextListener;
     private SearchView.OnCloseListener closeListener;
@@ -124,9 +125,8 @@ public class LookupFragment extends BaseListFragment implements LookupListener {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         timer = new Timer();
         inflater.inflate(R.menu.lookup, menu);
-        MenuItem miFilter = menu.findItem(R.id.action_lookup);
-        View filterActionView = miFilter.getActionView();
-        searchView = (SearchView) filterActionView.findViewById(R.id.fldLookup);
+        MenuItem miFilter = menu.findItem(R.id.fldLookup);
+        searchView = (SearchView) miFilter.getActionView();
         searchView.setQueryHint(miFilter.getTitle());
         searchView.setIconified(false);
         searchView.setOnQueryTextListener(queryTextListener);

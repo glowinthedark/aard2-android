@@ -1,19 +1,20 @@
 package itkach.aard2;
 
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
-import android.app.FragmentTransaction;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.core.app.Fragment;
-import androidx.core.app.FragmentActivity;
-import androidx.core.app.FragmentManager;
-import androidx.core.app.FragmentPagerAdapter;
-import androidx.core.view.ViewPager;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -26,12 +27,12 @@ import java.util.regex.Pattern;
 
 import itkach.slob.Slob;
 
-public class MainActivity extends FragmentActivity implements
+public class MainActivity extends AppCompatActivity implements
         ActionBar.TabListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private AppSectionsPagerAdapter appSectionsPagerAdapter;
-    private ViewPager viewPager;
+    private ViewPager2 viewPager;
 
     private Pattern[] NO_PASTE_PATTERNS = new Pattern[]{
             Patterns.WEB_URL,
@@ -46,14 +47,14 @@ public class MainActivity extends FragmentActivity implements
         setContentView(R.layout.activity_main);
 
         appSectionsPagerAdapter = new AppSectionsPagerAdapter(
-                getSupportFragmentManager());
+                this);
 
-        final ActionBar actionBar = getActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         actionBar.setHomeButtonEnabled(true);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        viewPager = (ViewPager) findViewById(R.id.pager);
-        viewPager.setOffscreenPageLimit(appSectionsPagerAdapter.getCount());
+        viewPager = (ViewPager2) findViewById(R.id.pager);
+        viewPager.setOffscreenPageLimit(appSectionsPagerAdapter.getItemCount());
         viewPager.setAdapter(appSectionsPagerAdapter);
 
         final String[] subtitles = new String[] {
@@ -63,9 +64,10 @@ public class MainActivity extends FragmentActivity implements
                 getString(R.string.subtitle_dictionaries),
                 getString(R.string.subtitle_settings),
         };
+        actionBar.setSubtitle(subtitles[viewPager.getCurrentItem()]);
 
         viewPager
-                .setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                .registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                     @Override
                     public void onPageSelected(int position) {
                         actionBar.setSelectedNavigationItem(position);
@@ -80,16 +82,14 @@ public class MainActivity extends FragmentActivity implements
         tabIcons[3] = IconMaker.tab(this, IconMaker.IC_DICTIONARY);
         tabIcons[4] = IconMaker.tab(this, IconMaker.IC_SETTINGS);
         // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < appSectionsPagerAdapter.getCount(); i++) {
-            Tab tab = actionBar.newTab();
+        for (int i = 0; i < appSectionsPagerAdapter.getItemCount(); i++) {
+            ActionBar.Tab tab = actionBar.newTab();
             tab.setTabListener(this);
             tab.setIcon(tabIcons[i]);
             actionBar.addTab(tab);
         }
 
-        if (savedInstanceState != null) {
-            onRestoreInstanceState(savedInstanceState);
-        } else {
+        if (savedInstanceState == null) {
             if (app.dictionaries.size() == 0) {
                 viewPager.setCurrentItem(3);
             }
@@ -112,8 +112,8 @@ public class MainActivity extends FragmentActivity implements
 
     @Override
     public void onTabUnselected(ActionBar.Tab tab,
-            FragmentTransaction fragmentTransaction) {
-        Fragment frag = appSectionsPagerAdapter.getItem(tab.getPosition());
+                                FragmentTransaction fragmentTransaction) {
+        Fragment frag = appSectionsPagerAdapter.createFragment(tab.getPosition());
         if (frag instanceof BaseListFragment) {
             ((BaseListFragment)frag).finishActionMode();
         }
@@ -166,7 +166,10 @@ public class MainActivity extends FragmentActivity implements
         //Hiding it appears to reduce that.
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         try {
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            View currentFocus = getCurrentFocus();
+            if (currentFocus != null) {
+                inputMethodManager.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+            }
         }
         catch (Exception e) {
             Log.w(TAG, "Hiding soft input failed", e);
@@ -177,7 +180,7 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void onBackPressed() {
         int currentItem = viewPager.getCurrentItem();
-        Fragment frag = appSectionsPagerAdapter.getItem(currentItem);
+        Fragment frag = appSectionsPagerAdapter.createFragment(currentItem);
         Log.d(TAG, "current tab: " + currentItem);
         if (frag instanceof BlobDescriptorListFragment) {
             BlobDescriptorListFragment bdFrag = (BlobDescriptorListFragment)frag;
@@ -259,7 +262,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public static class AppSectionsPagerAdapter extends FragmentPagerAdapter {
+    public static class AppSectionsPagerAdapter extends FragmentStateAdapter {
         private Fragment[]         fragments;
         LookupFragment             tabLookup;
         BlobDescriptorListFragment tabBookmarks;
@@ -267,8 +270,8 @@ public class MainActivity extends FragmentActivity implements
         DictionariesFragment       tabDictionaries;
         SettingsFragment           tabSettings;
 
-        public AppSectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
+        public AppSectionsPagerAdapter(FragmentActivity activity) {
+            super(activity);
             tabLookup = new LookupFragment();
             tabBookmarks = new BookmarksFragment();
             tabHistory = new HistoryFragment();
@@ -279,19 +282,19 @@ public class MainActivity extends FragmentActivity implements
         }
 
         @Override
-        public Fragment getItem(int i) {
+        public Fragment createFragment(int i) {
             return fragments[i];
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             return fragments.length;
         }
 
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return "";
-        }
+//        @Override
+//        public CharSequence getPageTitle(int position) {
+//            return "";
+//        }
     }
 
     @Override
@@ -337,7 +340,7 @@ public class MainActivity extends FragmentActivity implements
                 viewPager.setCurrentItem(current - 1);
             }
             else {
-                viewPager.setCurrentItem(appSectionsPagerAdapter.getCount() - 1);
+                viewPager.setCurrentItem(appSectionsPagerAdapter.getItemCount() - 1);
             }
             return true;
         }
@@ -347,7 +350,7 @@ public class MainActivity extends FragmentActivity implements
                 return false;
             }
             int current = viewPager.getCurrentItem();
-            if (current < appSectionsPagerAdapter.getCount() - 1) {
+            if (current < appSectionsPagerAdapter.getItemCount() - 1) {
                 viewPager.setCurrentItem(current + 1);
             }
             else {

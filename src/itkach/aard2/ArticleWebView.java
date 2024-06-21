@@ -19,6 +19,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,6 +119,11 @@ public class ArticleWebView extends SearchableWebView {
         settings.setJavaScriptEnabled(true);
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true);
+        }
 
         Resources r = getResources();
         defaultStyleTitle = r.getString(R.string.default_style_title);
@@ -249,13 +257,13 @@ public class ArticleWebView extends SearchableWebView {
                     }
                 }
 
-                if (scheme.equals("http") && host.equals(LOCALHOST) && uri.getQueryParameter("blob") == null) {
-                    Intent intent = new Intent(getContext(), ArticleCollectionActivity.class);
-                    intent.setData(uri);
-                    getContext().startActivity(intent);
-                    Log.d(TAG, "Overriding loading of " + url);
-                    return true;
-                }
+//                if (scheme.equals("http") && host.equals(LOCALHOST) && uri.getQueryParameter("blob") == null) {
+//                    Intent intent = new Intent(getContext(), ArticleCollectionActivity.class);
+//                    intent.setData(uri);
+//                    getContext().startActivity(intent);
+//                    Log.d(TAG, "Overriding loading of " + url);
+//                    return true;
+//                }
                 Log.d(TAG, "NOT overriding loading of " + url);
                 return false;
             }

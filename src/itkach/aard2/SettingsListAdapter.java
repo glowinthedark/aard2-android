@@ -10,7 +10,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import androidx.core.app.Fragment;
+import androidx.fragment.app.Fragment;
+
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;

@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorPrimary">#26486d</color>
+    <color name="colorAccent">#26486d</color>
+    <color name="colorPrimaryVariant">#26486d</color>
+    <color name="colorOnPrimary">#000000</color>
     <color name="tab_icon">#ff888888</color>
-    <color name="actionbar_icon">@android:color/secondary_text_dark</color>
+    <color name="actionbar_icon">@color/colorPrimaryVariant</color>
     <color name="empty_view_icon">#ffcccccc</color>
-    <color name="list_icon">@android:color/holo_blue_dark</color>
+    <color name="list_icon">@color/colorPrimary</color>
 </resources>
 
