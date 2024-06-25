@@ -173,7 +173,7 @@ public class ArticleWebView extends SearchableWebView {
                     times.put(url, tsList);
                     view.loadUrl("javascript:" + styleSwitcherJs);
                     try {
-                        timer.schedule(applyStylePref, 250, 200);
+                        timer.schedule(applyStylePref, 0, 10);
                     } catch (IllegalStateException ex) {
                         Log.w(TAG, "Failed to schedule applyStylePref in view " + view.getId(), ex);
                     }
