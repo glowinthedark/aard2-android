@@ -209,18 +209,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
                         }
                     }
                 });
-                // setCurrentItem is bugged and wont siwtch correctly
-                // so we use another solution found here https://stackoverflow.com/questions/70736007/viewpager2-setcurrentitem-bug-workaround
-                tabs.post(()->{
-                    tabs.selectTab(tabs.getTabAt(position));
-                    viewPager.post(()->{
-                        viewPager.setCurrentItem(position);
-                        //I noticed on older devices like API 19
-                        //the viewPager wouldn't complete transformations
-                        //so we call this.
-                        viewPager.requestTransform();
-                    });
-                });
+                viewPager.setCurrentItem(position, false);
                 updateTitle(position);
             }
         };
