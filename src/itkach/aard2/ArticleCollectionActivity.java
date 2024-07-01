@@ -167,6 +167,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
                         articleCollectionPagerAdapter.getItemCount() == 1 ? ViewGroup.GONE : ViewGroup.VISIBLE);
 
                 viewPager = (ViewPager2) findViewById(R.id.pager);
+                viewPager.setNestedScrollingEnabled(true);
                 viewPager.setAdapter(articleCollectionPagerAdapter);
                 TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabs, viewPager, true, new TabLayoutMediator.TabConfigurationStrategy() {
                     @Override
