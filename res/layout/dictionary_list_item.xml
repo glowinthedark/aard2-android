@@ -11,6 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:layout_marginBottom="6dp"
         >
@@ -32,9 +33,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left|top"
             android:layout_weight="1"/>
-        <Switch
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/dictionary_active"
             android:checked="true"
             android:enabled="true"
@@ -47,6 +48,7 @@
     <LinearLayout
         android:id="@+id/dictionary_error_row"
         android:layout_width="match_parent"
+        android:gravity="center_vertical"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="4dp"
@@ -59,6 +61,7 @@
             android:baselineAlignBottom="true"
             android:layout_marginRight="4dp"
             android:layout_marginEnd="4dp"
+            android:src="@drawable/error_24px"
             />
 
         <TextView
@@ -75,6 +78,7 @@
     <LinearLayout
         android:id="@+id/dictionary_details"
         android:layout_width="match_parent"
+        android:gravity="center_vertical"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginBottom="6dp"
@@ -103,9 +107,11 @@
                 android:id="@+id/dictionary_copyright_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:baselineAlignBottom="true"
                 android:layout_marginRight="4dp"
                 android:layout_marginEnd="4dp"
+                android:src="@drawable/copyright_24px"
                 />
 
             <TextView
@@ -124,6 +130,7 @@
             android:id="@+id/dictionary_license_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:layout_marginBottom="2dp"
             >
@@ -134,6 +141,7 @@
                 android:baselineAlignBottom="true"
                 android:layout_marginRight="4dp"
                 android:layout_marginEnd="4dp"
+                android:src="@drawable/license_24px"
                 />
             <TextView
                 android:id="@+id/dictionary_license"
@@ -149,6 +157,7 @@
         <LinearLayout
             android:id="@+id/dictionary_source_row"
             android:layout_width="match_parent"
+            android:gravity="center_vertical"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="2dp"
@@ -161,6 +170,7 @@
                 android:baselineAlignBottom="true"
                 android:layout_marginRight="4dp"
                 android:layout_marginEnd="4dp"
+                android:src="@drawable/open_in_new_24px"
                 />
 
             <TextView
@@ -178,6 +188,7 @@
             android:id="@+id/dictionary_path_row"
             android:orientation="horizontal"
             android:layout_width="match_parent"
+            android:gravity="center_vertical"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
             >
@@ -188,6 +199,7 @@
                 android:baselineAlignBottom="true"
                 android:layout_marginRight="4dp"
                 android:layout_marginEnd="4dp"
+                android:src="@drawable/draft_24px"
                 />
             <TextView
                 android:id="@+id/dictionary_path"
@@ -225,7 +237,8 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp"
                 android:paddingLeft="16dp"
-                android:layout_alignParentLeft="true"/>
+                android:layout_alignParentLeft="true"
+                android:src="@drawable/keyboard_arrow_up_24px"/>
 
             <Space
                 android:layout_width="wrap_content"
@@ -245,7 +258,8 @@
             android:paddingTop="8dp"
             android:paddingBottom="4dp"
             android:paddingLeft="16dp"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentRight="true"
+            android:src="@drawable/delete_24px"/>
 
     </LinearLayout>
 

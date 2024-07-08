@@ -24,9 +24,12 @@
     <activity
         android:name=".MainActivity"
         android:configChanges="keyboard|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-        android:windowSoftInputMode="stateHidden|adjustPan"
+        android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
         android:exported="true"
         >
+
+      <!-- This is added to handle a deep link -->
+      <nav-graph android:value="@navigation/lookup" />
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

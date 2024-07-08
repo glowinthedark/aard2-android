@@ -33,6 +33,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:layout_marginBottom="2dp"
         android:layout_marginRight="14dip"
@@ -46,12 +47,14 @@
             android:baselineAlignBottom="true"
             android:layout_marginRight="4dp"
             android:layout_marginEnd="4dp"
+            android:src="@drawable/copyright_24px"
             />
 
         <TextView
             android:id="@+id/application_copyright"
             style="@android:style/TextAppearance.Holo.SearchResult.Subtitle"
             android:text="@string/application_copyright"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -64,6 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_marginBottom="2dp"
         android:layout_marginRight="14dip"
         android:layout_marginLeft="14dip"
@@ -75,6 +79,7 @@
             android:baselineAlignBottom="true"
             android:layout_marginRight="4dp"
             android:layout_marginEnd="4dp"
+            android:src="@drawable/license_24px"
             />
         <TextView
             android:id="@+id/application_license"
@@ -91,6 +96,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:layout_marginBottom="2dp"
         android:layout_marginRight="14dip"
@@ -104,6 +110,7 @@
             android:baselineAlignBottom="true"
             android:layout_marginRight="4dp"
             android:layout_marginEnd="4dp"
+            android:src="@drawable/open_in_new_24px"
             />
 
         <TextView

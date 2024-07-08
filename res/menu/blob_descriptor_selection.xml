@@ -2,10 +2,12 @@
 
     <item
         android:id="@+id/blob_descriptor_select_all"
-        android:title="@android:string/selectAll"/>
+        android:title="@android:string/selectAll"
+        android:icon="@drawable/select_all_24px"/>
     
     <item
         android:id="@+id/blob_descriptor_delete"
         android:title="@string/delete"
+        android:icon="@drawable/delete_24px"
         />
 </menu>

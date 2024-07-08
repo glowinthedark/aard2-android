@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <itkach.aard2.ArticleWebView android:id="@+id/webView"
+    <itkach.aard2.ArticleWebView
+        android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
