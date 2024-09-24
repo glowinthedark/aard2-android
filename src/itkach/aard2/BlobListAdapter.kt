@@ -10,6 +10,8 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import itkach.aard2.BlobListAdapter
 import itkach.slob.Slob
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -23,6 +25,7 @@ class BlobListAdapter @JvmOverloads constructor(
     var list: MutableList<Slob.Blob>? = ArrayList(chunkSize)
     var iter: Iterator<Slob.Blob>? = null
     var executor: ExecutorService = Executors.newSingleThreadExecutor()
+    private var loadingChunk: Boolean = false
 
     var MAX_SIZE: Int = 10000
 
@@ -32,40 +35,48 @@ class BlobListAdapter @JvmOverloads constructor(
             notifyDataSetChanged()
         }
         this.iter = lookupResultsIter
-        loadChunkSync()
-    }
-
-    private fun loadChunkSync() {
-        val t0 = System.currentTimeMillis()
-        var count = 0
-        val chunkList: MutableList<Slob.Blob> = LinkedList()
-
-        while (iter!!.hasNext() && count < chunkSize && list!!.size <= MAX_SIZE) {
-            count++
-            val b = iter!!.next()
-            chunkList.add(b)
-        }
-
-        mainHandler.post {
-            list!!.addAll(chunkList)
-            notifyDataSetChanged()
-        }
-
-        Log.d(
-            TAG,
-            String.format(
-                "Loaded chunk of %d (adapter size %d) in %d ms",
-                count, list!!.size, (System.currentTimeMillis() - t0)
-            )
-        )
+        loadChunk()
     }
 
     private fun loadChunk() {
-        if (!iter!!.hasNext()) {
+        if (loadingChunk || !iter!!.hasNext()) {
             return
         }
-        executor.execute { loadChunkSync() }
+        loadingChunk = true
+        Log.d(TAG, "loadChunk")
+        GlobalScope.async {
+            val t0 = System.currentTimeMillis()
+            var count = 0
+            val chunkList: MutableList<Slob.Blob> = LinkedList()
+
+            while (iter!!.hasNext() && count < chunkSize && list!!.size <= MAX_SIZE) {
+                count++
+                val b = iter!!.next()
+                chunkList.add(b)
+            }
+
+            mainHandler.post {
+                list!!.addAll(chunkList)
+                notifyDataSetChanged()
+            }
+            loadingChunk = false
+            Log.d(
+                TAG,
+                String.format(
+                    "Loaded chunk of %d (adapter size %d) in %d ms",
+                    count, list!!.size, (System.currentTimeMillis() - t0)
+                )
+            )
+        }.start()
+
     }
+
+//    private fun loadChunk() {
+//        if (!iter!!.hasNext()) {
+//            return
+//        }
+//        executor.execute { loadChunkSync() }
+//    }
 
     override fun getCount(): Int {
         return if (list == null) 0 else list!!.size
@@ -73,7 +84,6 @@ class BlobListAdapter @JvmOverloads constructor(
 
     override fun getItem(position: Int): Any {
         val result: Any = list!![position]
-        maybeLoadMore(position)
         return result
     }
 
@@ -81,9 +91,9 @@ class BlobListAdapter @JvmOverloads constructor(
         return position.toLong()
     }
 
-    private fun maybeLoadMore(position: Int) {
+    fun maybeLoadMore(position: Int) {
         if (position >= list!!.size - loadMoreThreashold) {
-//            loadChunk()
+            loadChunk()
         }
     }
 

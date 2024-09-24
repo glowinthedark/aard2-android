@@ -51,7 +51,7 @@ class BlobDescriptor : BaseDescriptor() {
             bd.slobId = pathSegments[1]
             val key = StringBuilder()
             for (i in 2 until segmentCount) {
-                if (key.length > 0) {
+                if (key.isNotEmpty()) {
                     key.append("/")
                 }
                 key.append(pathSegments[i])

@@ -59,6 +59,10 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
 
     private var onDestroyCalled = false
 
+
+    val currentPosition: Int
+        get() = viewPager.currentItem
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_PROGRESS)
@@ -123,7 +127,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                         if (articleCollectionPagerAdapter!!.itemCount == 1) ViewGroup.GONE else ViewGroup.VISIBLE
 
                     viewPager = findViewById<View>(R.id.pager) as ViewPager2
-                    viewPager.offscreenPageLimit = 1
+                    viewPager.isUserInputEnabled = false
                     viewPager.isNestedScrollingEnabled = true
                     viewPager.adapter = articleCollectionPagerAdapter
                     val tabLayoutMediator =
@@ -138,11 +142,13 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
 
                         override fun onPageSelected(position: Int) {
                             updateTitle(position)
+                            // fragment might not be created yet
                             val fragment =
                                 articleCollectionPagerAdapter!!.getPageFragment(position.toLong())
                             if (fragment != null) {
                                 articleCollectionPagerAdapter!!.primaryItem = fragment
-                                runOnUiThread { //                                ArticleFragment fragment =(ArticleFragment) articleCollectionPagerAdapter.createFragment(position);
+                                runOnUiThread {
+                                    fragment.loadUrlIfNeeded()
                                     fragment.applyTextZoomPref()
                                 }
                             }
@@ -202,7 +208,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
         return ArticleCollectionPagerAdapter(
             app, BlobDescriptorListAdapter(app.bookmarks), object : ToBlob {
                 override fun convert(item: Any): Slob.Blob? {
-                    return app.bookmarks.resolve((item as BlobDescriptor))
+                    return app.bookmarks!!.resolve((item as BlobDescriptor))
                 }
             }, this
         )
@@ -212,7 +218,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
         return ArticleCollectionPagerAdapter(
             app, BlobDescriptorListAdapter(app.history), object : ToBlob {
                 override fun convert(item: Any): Slob.Blob? {
-                    return app.history.resolve((item as BlobDescriptor))
+                    return app.history!!.resolve((item as BlobDescriptor))
                 }
             }, this
         )
@@ -371,7 +377,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
     override fun onDestroy() {
         onDestroyCalled = true
         if (viewPager != null) {
-            viewPager!!.adapter = null
+            viewPager.adapter = null
         }
         if (articleCollectionPagerAdapter != null) {
             articleCollectionPagerAdapter!!.destroy()
@@ -548,6 +554,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                 val articleUrl = app!!.getUrl(blob)
                 val args = Bundle()
                 args.putString(ArticleFragment.ARG_URL, articleUrl)
+                args.putInt(ArticleFragment.ARG_POSITION, i)
                 fragment.arguments = args
             }
             return fragment

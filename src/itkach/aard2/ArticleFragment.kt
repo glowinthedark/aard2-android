@@ -24,6 +24,7 @@ class ArticleFragment : Fragment() {
     private lateinit var miBookmark: MenuItem
     private lateinit var miFullscreen: MenuItem
     var url: String? = null
+     var position: Int? = -1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,6 +114,7 @@ class ArticleFragment : Fragment() {
     ): View? {
         val args = arguments
         this.url = args?.getString(ARG_URL)
+        this.position = args?.getInt(ARG_POSITION)
         if (url == null) {
             val layout = inflater.inflate(R.layout.empty_view, container, false)
             val textView = layout.findViewById<View>(R.id.empty_text) as TextView
@@ -127,8 +129,10 @@ class ArticleFragment : Fragment() {
         val progressBar =
             layout.findViewById<View>(R.id.webViewProgress) as ContentLoadingProgressBar
         webView = layout.findViewById<View>(R.id.webView) as ArticleWebView
+        if (this.position == (activity as ArticleCollectionActivity?)!!.currentPosition) {
+            loadUrlIfNeeded()
+        }
 //        webView.restoreState(savedInstanceState!!)
-        webView.loadUrl(url!!)
         webView.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 val activity: Activity? = activity
@@ -142,6 +146,11 @@ class ArticleFragment : Fragment() {
         }
 
         return layout
+    }
+
+    fun loadUrlIfNeeded() {
+        webView.loadUrl(url!!)
+
     }
 
 
@@ -184,5 +193,6 @@ class ArticleFragment : Fragment() {
 
     companion object {
         const val ARG_URL: String = "articleUrl"
+        const val ARG_POSITION: String = "articlePosition"
     }
 }

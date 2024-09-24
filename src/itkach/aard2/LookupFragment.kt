@@ -1,6 +1,7 @@
 package itkach.aard2
 
 import android.content.Intent
+import android.database.DataSetObserver
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -18,6 +19,7 @@ class LookupFragment : BaseListFragment(), LookupListener {
     private var app: Application? = null
     private var queryTextListener: SearchView.OnQueryTextListener? = null
     private var closeListener: SearchView.OnCloseListener? = null
+    private lateinit var observer: DataSetObserver
 
 
     override val emptyIcon: Int
@@ -41,6 +43,7 @@ class LookupFragment : BaseListFragment(), LookupListener {
         super.onViewCreated(view, savedInstanceState)
         setBusy(false)
         val listView = listView
+        setListShown(true)
         listView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
             Log.i("--", "Item clicked: $position")
             val intent = Intent(
@@ -51,7 +54,13 @@ class LookupFragment : BaseListFragment(), LookupListener {
             startActivity(intent)
         }
         val app = requireActivity().application as Application
-        getListView().adapter = app.lastResult
+        listView.adapter = app.lastResult
+//        this.observer = object : DataSetObserver() {
+//            override fun onChanged() {
+//                getListView().invalidateViews()
+//            }
+//        }
+//        app.lastResult!!.registerDataSetObserver(observer)
 
         closeListener = SearchView.OnCloseListener { true }
 
@@ -129,7 +138,6 @@ class LookupFragment : BaseListFragment(), LookupListener {
         if (view == null) {
             return
         }
-        setListShown(!busy)
         if (!busy) {
             val emptyText = (emptyView.findViewById<View>(R.id.empty_text) as TextView)
             var msg = ""

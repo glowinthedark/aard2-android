@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/lookup"
+        android:icon="@drawable/search_24px"
+        android:title="@string/subtitle_lookup"/>
+    <item
+        android:id="@+id/bookmarks"
+        android:icon="@drawable/bookmarks_24px"
+        android:title="@string/subtitle_bookmark"/>
+    <item
+        android:id="@+id/history"
+        android:icon="@drawable/history_24px"
+        android:title="@string/subtitle_history"/>
+    <item
+        android:id="@+id/dictionaries"
+        android:icon="@drawable/dictionary_24px"
+        android:title="@string/subtitle_dictionaries"/>
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/settings_24px"
+        android:title="@string/subtitle_settings"/>
+</menu>
