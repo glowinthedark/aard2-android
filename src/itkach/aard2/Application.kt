@@ -131,8 +131,17 @@ class Application : android.app.Application() {
                 slobber!!.setSlobs(null)
                 val slobs: MutableList<Slob> = ArrayList()
                 for (sd in dictionaries!!) {
+                    val origSlobId = sd.id;
                     val s = sd.load(applicationContext)
                     if (s != null) {
+                        if (!origSlobId.equals(sd.id)) {
+                            Log.d(TAG, String.format("%s has been replaced, updating dict store %s -> %s", sd.path, origSlobId, sd.id));
+                            //dictionary file has been replaced
+                            //(same file name, different slob uuid)
+                            //need to update store accordingly
+                            dictStore!!.delete(origSlobId);
+                            dictStore!!.save(sd);
+                        }
                         slobs.add(s)
                     }
                 }
