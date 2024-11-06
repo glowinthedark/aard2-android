@@ -19,7 +19,7 @@ import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 
 class ArticleFragment : Fragment() {
-    lateinit var webView: ArticleWebView
+     var webView: ArticleWebView? = null
         private set
     private lateinit var miBookmark: MenuItem
     private lateinit var miFullscreen: MenuItem
@@ -51,9 +51,12 @@ class ArticleFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (webView == null) {
+            return false;
+        }
         val itemId = item.itemId
         if (itemId == R.id.action_find_in_page) {
-            webView.showFindDialog(null, true)
+            webView!!.showFindDialog(null, true)
             return true
         }
         if (itemId == R.id.action_bookmark_article) {
@@ -74,32 +77,32 @@ class ArticleFragment : Fragment() {
             return true
         }
         if (itemId == R.id.action_zoom_in) {
-            webView.textZoomIn()
+            webView!!.textZoomIn()
             return true
         }
         if (itemId == R.id.action_zoom_out) {
-            webView.textZoomOut()
+            webView!!.textZoomOut()
             return true
         }
         if (itemId == R.id.action_zoom_reset) {
-            webView.resetTextZoom()
+            webView!!.resetTextZoom()
             return true
         }
         if (itemId == R.id.action_load_remote_content) {
-            webView.forceLoadRemoteContent = !webView.forceLoadRemoteContent
-            webView.settings.cacheMode =
-                if (webView.forceLoadRemoteContent) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_CACHE_ELSE_NETWORK
-            webView.reload()
+            webView!!.forceLoadRemoteContent = !webView!!.forceLoadRemoteContent
+            webView!!.settings.cacheMode =
+                if (webView!!.forceLoadRemoteContent) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_CACHE_ELSE_NETWORK
+            webView!!.reload()
             return true
         }
         if (itemId == R.id.action_select_style) {
             val builder = AlertDialog.Builder(activity)
-            val styleTitles = webView.availableStyles
+            val styleTitles = webView!!.availableStyles
             builder.setTitle(R.string.select_style)
                 .setItems(styleTitles) { dialog, which ->
                     val title = styleTitles[which]
-                    webView.saveStylePref(title)
-                    webView.applyStylePref()
+                    webView!!.saveStylePref(title)
+                    webView!!.applyStylePref()
                 }
             val dialog = builder.create()
             dialog.show()
@@ -133,7 +136,7 @@ class ArticleFragment : Fragment() {
             loadUrlIfNeeded()
         }
 //        webView.restoreState(savedInstanceState!!)
-        webView.webChromeClient = object : WebChromeClient() {
+        webView!!.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 val activity: Activity? = activity
                 activity?.runOnUiThread {
@@ -149,7 +152,7 @@ class ArticleFragment : Fragment() {
     }
 
     fun loadUrlIfNeeded() {
-        webView.loadUrl(url!!)
+        webView?.loadUrl(url!!)
 
     }
 
@@ -179,15 +182,15 @@ class ArticleFragment : Fragment() {
     }
 
     fun applyTextZoomPref() {
-        webView.applyTextZoomPref()
+        webView?.applyTextZoomPref()
     }
 
     fun applyStylePref() {
-        webView.applyStylePref()
+        webView?.applyStylePref()
     }
 
     override fun onDestroy() {
-        webView.destroy()
+        webView?.destroy()
         super.onDestroy()
     }
 

@@ -369,8 +369,8 @@ class Application : android.app.Application() {
         )
     }
 
-    fun getSlob(slobId: String?): Slob {
-        return slobber!!.getSlob(slobId)
+    fun getSlob(slobId: String?): Slob? {
+        return slobber?.getSlob(slobId)
     }
 
     @Synchronized
@@ -388,12 +388,12 @@ class Application : android.app.Application() {
     }
 
 
-    fun findSlob(slobOrUri: String?): Slob {
-        return slobber!!.findSlob(slobOrUri)
+    fun findSlob(slobOrUri: String?): Slob? {
+        return slobber?.findSlob(slobOrUri)
     }
 
-    fun getSlobURI(slobId: String?): String {
-        return slobber!!.getSlobURI(slobId)
+    fun getSlobURI(slobId: String?): String? {
+        return slobber?.getSlobURI(slobId)
     }
 
 

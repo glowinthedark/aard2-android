@@ -28,7 +28,7 @@ class SlobDescriptorList internal constructor(
             compare(d1.priority, d2.priority)
         }
 
-    fun resolve(sd: SlobDescriptor): Slob {
+    fun resolve(sd: SlobDescriptor): Slob? {
         return app.getSlob(sd.id)
     }
 

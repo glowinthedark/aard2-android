@@ -496,8 +496,10 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
         }
         val af = articleCollectionPagerAdapter!!.primaryItem
         if (af != null) {
-            val webView = af.webView
-
+            val webView = af.webView!!
+            if (webView == null) {
+                return false
+            }
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 webView.pageUp(true)
                 return true

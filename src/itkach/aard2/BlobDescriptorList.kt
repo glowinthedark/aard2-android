@@ -140,7 +140,7 @@ class BlobDescriptorList @JvmOverloads constructor(
         }
     }
 
-    fun resolveOwner(bd: BlobDescriptor): Slob {
+    fun resolveOwner(bd: BlobDescriptor): Slob? {
         var slob = app.getSlob(bd.slobId)
         //        if (slob == null || !slob.file.exists()) {
         if (slob == null) {
