@@ -9,6 +9,8 @@ import android.database.DataSetObserver
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MenuItem
@@ -35,12 +37,14 @@ import itkach.slob.Slob.PeekableIterator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChangeListener,
     OnSharedPreferenceChangeListener {
     var articleCollectionPagerAdapter: ArticleCollectionPagerAdapter? = null
-    private lateinit var viewPager: ViewPager2
+    private var viewPager: ViewPager2? = null
 
 
     internal inner class ToBlobWithFragment(private val fragment: String) : ToBlob {
@@ -61,7 +65,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
 
 
     val currentPosition: Int
-        get() = viewPager.currentItem
+        get() = if (viewPager != null) viewPager!!.currentItem else -1
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,15 +131,15 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                         if (articleCollectionPagerAdapter!!.itemCount == 1) ViewGroup.GONE else ViewGroup.VISIBLE
 
                     viewPager = findViewById<View>(R.id.pager) as ViewPager2
-                    viewPager.isUserInputEnabled = false
-                    viewPager.isNestedScrollingEnabled = true
-                    viewPager.adapter = articleCollectionPagerAdapter
+                    viewPager!!.isUserInputEnabled = false
+                    viewPager!!.isNestedScrollingEnabled = true
+                    viewPager!!.adapter = articleCollectionPagerAdapter
                     val tabLayoutMediator =
                         TabLayoutMediator(tabs, viewPager!!, true) { tab, position ->
                             tab.setText(articleCollectionPagerAdapter!!.getPageTitle(position))
                         }
                     tabLayoutMediator.attach()
-                    viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+                    viewPager!!.registerOnPageChangeCallback(object : OnPageChangeCallback() {
                         override fun onPageScrollStateChanged(arg0: Int) {}
 
                         override fun onPageScrolled(arg0: Int, arg1: Float, arg2: Int) {}
@@ -164,12 +168,12 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                             }
                         }
                     })
-                    viewPager.setCurrentItem(position, false)
+                    viewPager!!.setCurrentItem(position, false)
                     updateTitle(position)
                 }
 
             } catch (e: Exception) {
-                if (isFinishing || onDestroyCalled) {
+                Handler(Looper.getMainLooper()).post {
                     Toast.makeText(
                         this@ArticleCollectionActivity,
                         e!!.localizedMessage,
@@ -178,7 +182,6 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                     finish()
                 }
             }
-
         }
         deferred.start()
     }
@@ -239,22 +242,25 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
         var preferredSlobId: String? = null
         if (lookupKey == null) {
             val uri = intent.data
-            val segments = uri!!.pathSegments
-            val length = segments.size
-            if (length > 0) {
-                lookupKey = segments[length - 1]
-            }
-            val slobUri = Util.wikipediaToSlobUri(uri)
-            Log.d(TAG, String.format("Converted URI %s to slob URI %s", uri, slobUri))
-            if (slobUri != null) {
-                val slob = app.findSlob(slobUri)
-                if (slob != null) {
-                    preferredSlobId = slob.id.toString()
-                    Log.d(
-                        TAG,
-                        String.format("Found slob %s for slob URI %s", preferredSlobId, slobUri)
-                    )
+            if (uri != null) {
+                val segments = uri!!.pathSegments
+                val length = segments.size
+                if (length > 0) {
+                    lookupKey = segments[length - 1]
                 }
+                val slobUri = Util.wikipediaToSlobUri(uri)
+                Log.d(TAG, String.format("Converted URI %s to slob URI %s", uri, slobUri))
+                if (slobUri != null) {
+                    val slob = app.findSlob(slobUri)
+                    if (slob != null) {
+                        preferredSlobId = slob.id.toString()
+                        Log.d(
+                            TAG,
+                            String.format("Found slob %s for slob URI %s", preferredSlobId, slobUri)
+                        )
+                    }
+                }
+
             }
         }
         val data = BlobListAdapter(this, 20, 1)
@@ -377,7 +383,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
     override fun onDestroy() {
         onDestroyCalled = true
         if (viewPager != null) {
-            viewPager.adapter = null
+            viewPager!!.adapter = null
         }
         if (articleCollectionPagerAdapter != null) {
             articleCollectionPagerAdapter!!.destroy()
@@ -452,9 +458,9 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                     }
                     val scrolled = webView.pageUp(false)
                     if (!scrolled) {
-                        val current = viewPager.currentItem
+                        val current = currentPosition
                         if (current > 0) {
-                            viewPager.currentItem = current - 1
+                            viewPager!!.currentItem = current - 1
                         } else {
                             finish()
                         }
@@ -467,9 +473,9 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                     }
                     val scrolled = webView.pageDown(false)
                     if (!scrolled) {
-                        val current = viewPager.currentItem
-                        if (current < articleCollectionPagerAdapter!!.itemCount - 1) {
-                            viewPager.currentItem = current + 1
+                        val current = currentPosition
+                        if (current >= 0 && current < articleCollectionPagerAdapter!!.itemCount - 1) {
+                            viewPager!!.currentItem = current + 1
                         }
                     }
                     return true
