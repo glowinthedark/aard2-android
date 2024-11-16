@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Aard 2</string>
+    <string name="app_name">Aardict</string>
     <string name="subtitle_lookup">Búsqueda</string>
     <string name="subtitle_bookmark">Marcadores</string>
     <string name="subtitle_history">Historial</string>

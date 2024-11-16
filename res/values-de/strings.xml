@@ -1,5 +1,5 @@
 ﻿<resources>
-    <string name="app_name">Aard 2</string>
+    <string name="app_name">Aardict</string>
     <string name="subtitle_lookup">Finden</string>
     <string name="subtitle_bookmark">Lesezeichen</string>
     <string name="subtitle_history">Verlauf</string>
