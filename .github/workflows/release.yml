@@ -92,10 +92,10 @@ jobs:
 
       - name: get current version
         run: | 
-          echo "CURRENT_VERSION=$(bundle exec fastlane run android_get_version_name | grep -oP '(?<=Result:)\s*\K(\d+\.?)+' )" > $GITHUB_ENV
+          echo "CURRENT_VERSION=$(bundle exec fastlane run android_get_version_name gradle_file:build.gradle | grep -oP '(?<=Result:)\s*\K(\d+\.?)+' )" > $GITHUB_ENV
       - name: get current version
         run: | 
-          echo "CURRENT_VERSION_CODE=$(bundle exec fastlane run android_get_version_code | grep -oP '(?<=Result:)\s*\K(\d+\.?)+' )" > $GITHUB_ENV
+          echo "CURRENT_VERSION_CODE=$(bundle exec fastlane run android_get_version_code gradle_file:build.gradle | grep -oP '(?<=Result:)\s*\K(\d+\.?)+' )" > $GITHUB_ENV
 
 
       - id: release_type_string
@@ -133,7 +133,7 @@ jobs:
         uses: Swisyn/android-version-generator-actions@v1.5
         if: github.event.inputs.release_type != 'none'
         with:
-          gradlePath: app/build.gradle # or app/build.gradle.kts 
+          gradlePath: build.gradle # or app/build.gradle.kts 
           versionCode: ${{env.NEW_VERSION_CODE}}
           versionName: ${{env.NEW_VERSION}}
 
