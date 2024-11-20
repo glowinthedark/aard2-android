@@ -41,8 +41,8 @@ jobs:
       - name: Checkout slob
         run: |
           cd ..
-          git clone https://github.com/itkach/slobj.git
-          git clone https://github.com/itkach/slobber.git
+          git clone https://github.com/farfromrefug/slobj.git
+          git clone https://github.com/farfromrefug/slobber.git
       
       - uses: oleksiyrudenko/gha-git-credentials@v2-latest
         with:
