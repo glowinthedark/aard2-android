@@ -62,8 +62,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 35
         compileSdk 35
-        versionName "1.0.2"
-        versionCode  60
+        versionName "1.0.3"
+        versionCode  61
         applicationId "com.akylas.aard2"
     }
     lint {
