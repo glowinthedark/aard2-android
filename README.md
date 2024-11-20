@@ -25,7 +25,7 @@
 Lookup queries are punctuation, diacritics and case
 insensitive.
 
-![](./images/sm-lookup.png)
+![](./images/lookup.png)
 
 
 ### Bookmarks and History
@@ -41,8 +41,8 @@ selection mode, tap items to be removed, tap Trash Can icon and
 confirm. A bookmark can also be removed by tapping Bookmark icon
 when viewing article.
 
-![](images/sm-bookmarks.png)
-![](images/sm-history.png)
+![](images/bookmarks.png)
+![](images/history.png)
 
 
 ### Dictionary Management
@@ -64,7 +64,7 @@ history or when following links in other articles. Unwanted dictionaries
 can also be completely removed from the program (but dictionary files
 are not deleted).
 
-![](images/sm-dictionaries.png)
+![](images/dictionaries.png)
 
 
 ### Article Appearance
@@ -73,19 +73,19 @@ Dictionaries may include alternate style sheets. User may
 also add custom style sheets via Settings tab. Dictionary built-in and
 user styles appear in the "Style..." menu in article view.
 
-![](images/sm-article_appearance_default.png)
-![](images/sm-article_menu.png)
-![](images/sm-article_appearance_select_style.png)
-![](images/sm-article_appearance_dark.png)
+![](images/article_appearance_default.png)
+![](images/article_menu.png)
+![](images/article_appearance_select_style.png)
+![](images/article_appearance_dark.png)
 
 ### Math
 
 Mathematical [formulas in Wikipedia](https://meta.wikimedia.org/wiki/Help:Displaying_a_formula) articles are rendered as text
 using [MathJax](http://www.mathjax.org/) - scalable, styleable, beautiful on any screen.
 
-![](images/sm-article-integral.png)
-![](images/sm-article-ru-ryad-taylora.png)
-![](images/sm-article-ru-zam-predely.png)
+![](images/article-integral.png)
+![](images/article-ru-ryad-taylora.png)
+![](images/article-ru-zam-predely.png)
 
 ### Random Article
 Tapping application logo in main activity finds a random title

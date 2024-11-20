@@ -12,7 +12,7 @@ repositories {
 }
 
 android {
-    namespace "itkach.aard2"
+    namespace "com.akylas.aard2"
 
     packagingOptions {
         project("slobj").file("exclude.txt").eachLine {
@@ -61,8 +61,8 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 34
-        compileSdk 34
+        targetSdkVersion 35
+        compileSdk 35
         versionName "1.0.2"
         versionCode  60
         applicationId "com.akylas.aard2"
@@ -77,19 +77,19 @@ android {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation "androidx.webkit:webkit:1.9.0"
+    implementation "androidx.webkit:webkit:1.12.1"
     implementation "androidx.appcompat:appcompat:1.7.0"
     implementation "androidx.viewpager2:viewpager2:1.1.0"
-    implementation "androidx.navigation:navigation-ui-ktx:2.7.7"
-    implementation "androidx.navigation:navigation-fragment-ktx:2.7.7"
-    implementation "androidx.navigation:navigation-runtime-ktx:2.7.7"
-    api 'com.fasterxml.jackson.core:jackson-databind:2.4+'
-    api 'com.fasterxml.jackson.core:jackson-core:2.4+'
-    api 'com.fasterxml.jackson.core:jackson-annotations:2.4+'
+    implementation "androidx.navigation:navigation-ui-ktx:2.8.4"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.8.4"
+    implementation "androidx.navigation:navigation-runtime-ktx:2.8.4"
+    api 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+    api 'com.fasterxml.jackson.core:jackson-core:2.11.1'
+    api 'com.fasterxml.jackson.core:jackson-annotations:2.11.1'
     api 'com.github.kazy1991:FontDrawable:0.9.5'
     api project(':slobj')
     api project(':slobber')
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
 }
