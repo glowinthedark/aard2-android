@@ -12,7 +12,7 @@ repositories {
 }
 
 android {
-    namespace "com.akylas.aard2"
+    namespace "itkach.aard2"
 
     packagingOptions {
         project("slobj").file("exclude.txt").eachLine {

@@ -525,7 +525,8 @@ class Application : android.app.Application() {
                     "Done getting available activities in " + (System.currentTimeMillis() - t0)
                 )
                 t0 = System.currentTimeMillis()
-                for (activityInfo in p.activities) {
+                for (activityInfo in p.activities!!) {
+
                     if (isCancelled) break
                     if (activityInfo.targetActivity != null) {
                         val enabled = hosts.contains(activityInfo.name)

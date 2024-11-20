@@ -410,7 +410,7 @@ class SettingsListAdapter internal constructor(private val fragment: Fragment) :
             var versionName: String
             try {
                 val info = manager.getPackageInfo(context.packageName, 0)
-                versionName = info.versionName
+                versionName = info.versionName.toString()
             } catch (e: PackageManager.NameNotFoundException) {
                 versionName = "?"
             }
