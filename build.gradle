@@ -58,7 +58,6 @@ android {
             }
         }
     }
-    compileSdkVersion 35
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 35

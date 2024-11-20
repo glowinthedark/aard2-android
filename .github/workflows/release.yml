@@ -37,6 +37,12 @@ jobs:
           fetch-depth: 0
           filter: tree:0
           submodules: recursive
+
+      - name: Checkout slob
+        run: |
+          cd ..
+          git clone https://github.com/itkach/slobj.git
+          git clone https://github.com/itkach/slobber.git
       
       - uses: oleksiyrudenko/gha-git-credentials@v2-latest
         with:
