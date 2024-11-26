@@ -106,11 +106,13 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
                     } else {
                         R.string.article_collection_nothing_found
                     }
-                    Toast.makeText(
-                        this@ArticleCollectionActivity, messageId,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    finish()
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(
+                            this@ArticleCollectionActivity, messageId,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        finish()
+                    }
                     return@async
                 }
 
