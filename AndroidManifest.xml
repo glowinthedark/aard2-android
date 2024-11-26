@@ -3,8 +3,7 @@
 
   <queries>
     <intent>
-      <action
-          android:name="android.intent.action.PROCESS_TEXT" />
+      <action android:name="android.intent.action.PROCESS_TEXT" />
       <data android:mimeType="text/plain" />
     </intent>
   </queries>
@@ -41,9 +40,20 @@
         android:name=".ArticleCollectionActivity"
         android:configChanges="keyboard|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
         android:excludeFromRecents="true"
+        android:launchMode="singleInstance"
+        android:noHistory="true"
         android:taskAffinity=""
         android:exported="true"
         >
+      <intent-filter>
+        <action android:name="android.intent.action.PROCESS_TEXT" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+      </intent-filter>
+      <intent-filter>
+          <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
+          <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
       <intent-filter>
         <action android:name="aard2.lookup" />
         <category android:name="android.intent.category.DEFAULT" />
@@ -61,9 +71,10 @@
         <data android:mimeType="text/plain" />
       </intent-filter>
       <intent-filter>
-        <action android:name="android.intent.action.PROCESS_TEXT" />
+        <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
-        <data android:mimeType="text/plain" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https" />
       </intent-filter>
     </activity>
 
