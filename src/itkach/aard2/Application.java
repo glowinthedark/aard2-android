@@ -10,10 +10,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
 import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.WindowCompat;
 
 import com.google.android.material.color.DynamicColors;
 
@@ -221,6 +223,8 @@ public class Application extends android.app.Application {
                     activeActivities.get(0).finish();
                 }
             }
+            Window window = activity.getWindow();
+            WindowCompat.setDecorFitsSystemWindows(window, false);
         }
 
         @Override

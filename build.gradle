@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application' version '7.4.0'
+    id 'com.android.application' version '8.7.3'
 }
 
 repositories {
@@ -11,7 +11,7 @@ repositories {
 }
 
 android {
-    compileSdk 33
+    compileSdk 35
 
     packagingOptions {
         exclude 'META-INF/LICENSE'
@@ -65,9 +65,9 @@ android {
 
     defaultConfig {
         namespace "itkach.aard2"
-        applicationId "itkach.aard2"
+        applicationId "io.github.muntashirakon.dictionary"
         minSdk 21
-        targetSdk 33
+        targetSdk 35
         versionCode 54
         versionName "0.54"
     }
@@ -75,20 +75,24 @@ android {
     packagingOptions {
         exclude 'META-INF/*.version'
     }
+
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
     api project(':slobj')
 
-    implementation "com.google.android.material:material:1.9.0"
-    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "com.google.android.material:material:1.12.0"
+    implementation "androidx.appcompat:appcompat:1.7.0"
     // Fix duplicate classes issue in material
     configurations {
         configureEach {
             exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
         }
     }
-    implementation "androidx.webkit:webkit:1.7.0"
+    implementation "androidx.webkit:webkit:1.12.1"
 
     api 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
     api 'com.fasterxml.jackson.core:jackson-core:2.11.1'
