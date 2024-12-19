@@ -14,6 +14,13 @@ repositories {
 android {
     namespace "itkach.aard2"
 
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
     packagingOptions {
         project("slobj").file("exclude.txt").eachLine {
             line ->
