@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         if (savedInstanceState != null) {
             onRestoreInstanceState(savedInstanceState);
-        } else if (SlobHelper.getInstance().dictionaries.size() == 0) {
+        } else if (SlobHelper.getInstance().dictionaries.isEmpty()) {
             viewPager.setCurrentItem(3);
         }
     }
@@ -287,7 +287,6 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-
         if (event.isCanceled()) {
             return true;
         }

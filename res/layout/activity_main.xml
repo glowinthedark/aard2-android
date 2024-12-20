@@ -6,6 +6,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
         app:liftOnScroll="true"
         app:liftOnScrollTargetViewId="@id/recycler_view">
 
@@ -42,6 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="72dp"
+        android:fitsSystemWindows="true"
         android:visibility="gone"
         android:src="@drawable/ic_auto_awesome"
         android:contentDescription="@string/action_open_random_article"

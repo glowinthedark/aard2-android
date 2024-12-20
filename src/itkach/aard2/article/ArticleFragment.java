@@ -136,7 +136,7 @@ public class ArticleFragment extends Fragment {
         LinearProgressIndicator progressBar = layout.findViewById(R.id.progress_horizontal);
         webView = layout.findViewById(R.id.webView);
         if (!Utils.isNightMode(webView.getContext())) {
-            webView.setBackgroundColor(MaterialColors.getColor(webView, R.attr.colorSurface));
+            webView.setBackgroundColor(MaterialColors.getColor(webView, com.google.android.material.R.attr.colorSurface));
         }
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         webView.restoreState(savedInstanceState);

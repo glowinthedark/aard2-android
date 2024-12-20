@@ -7,13 +7,15 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
 import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+import androidx.core.view.WindowCompat;
 
 import com.google.android.material.color.DynamicColors;
 
@@ -26,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import itkach.aard2.article.ArticleCollectionActivity;
 import itkach.aard2.lookup.LookupListener;
@@ -56,8 +59,7 @@ public class Application extends android.app.Application {
                     "setWebContentsDebuggingEnabled", boolean.class);
             setWebContentsDebuggingEnabledMethod.invoke(null, true);
         } catch (NoSuchMethodException e1) {
-            Log.d(TAG,
-                    "setWebContentsDebuggingEnabledMethod method not found");
+            Log.d(TAG, "setWebContentsDebuggingEnabledMethod method not found");
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -69,8 +71,7 @@ public class Application extends android.app.Application {
                 slobHelper.lastLookupResult.setResult(Collections.emptyIterator());
                 slobHelper.updateSlobs();
                 ThreadUtils.postOnMainThread(() -> {
-                    new EnableLinkHandling(Application.this)
-                            .execute(slobHelper.getActiveSlobs());
+                    enableLinkHandling(slobHelper.getActiveSlobs());
                     slobHelper.bookmarks.notifyDataSetChanged();
                     slobHelper.history.notifyDataSetChanged();
                     lookupAsync(AppPrefs.getLastQuery());
@@ -86,11 +87,11 @@ public class Application extends android.app.Application {
         AppPrefs.setLastQuery(query);
     }
 
-    private LookupTask currentLookupTask;
+    private Future<?> currentLookupTask;
 
     public void lookupAsync(@NonNull String query) {
         if (currentLookupTask != null) {
-            currentLookupTask.cancel(false);
+            currentLookupTask.cancel(true);
             notifyLookupCanceled(query);
             currentLookupTask = null;
         }
@@ -101,8 +102,14 @@ public class Application extends android.app.Application {
             return;
         }
 
-        currentLookupTask = new LookupTask(this, query);
-        currentLookupTask.execute();
+        currentLookupTask = ThreadUtils.postOnBackgroundThread(() -> {
+            Iterator<Blob> result = SlobHelper.getInstance().find(query);
+            if (Thread.currentThread().isInterrupted()) return;
+            ThreadUtils.postOnMainThread(() -> {
+                setLookupResult(query, result);
+                notifyLookupFinished(query);
+            });
+        });
     }
 
     private void notifyLookupStarted(String query) {
@@ -133,79 +140,48 @@ public class Application extends android.app.Application {
         lookupListeners.remove(listener);
     }
 
-    private static class LookupTask extends AsyncTask<Void, Void, Iterator<Blob>> {
-        private final Application application;
-        private final String query;
-
-        public LookupTask(@NonNull Application application, @NonNull String query) {
-            this.application = application;
-            this.query = query;
-        }
-
-        @Override
-        @NonNull
-        protected Iterator<Blob> doInBackground(Void... params) {
-            return SlobHelper.getInstance().find(query);
-        }
-
-        @Override
-        protected void onPostExecute(Iterator<Blob> result) {
-            if (!isCancelled()) {
-                application.setLookupResult(query, result);
-                application.notifyLookupFinished(query);
-            }
-        }
-
-    }
-
-    private static class EnableLinkHandling extends AsyncTask<Slob, Void, Void> {
-        private final Application application;
-
-        public EnableLinkHandling(@NonNull Application application) {
-            this.application = application;
-        }
-
-        @Override
-        protected Void doInBackground(Slob[] slobs) {
-            Set<String> hosts = new HashSet<>();
-            for (Slob slob : slobs) {
-                try {
-                    String uriValue = slob.getTags().get(SlobTags.TAG_URI);
-                    Uri uri = Uri.parse(uriValue);
-                    String host = uri.getHost();
-                    if (host != null) {
-                        hosts.add(host.toLowerCase(Locale.ROOT));
-                    }
-                } catch (Exception ex) {
-                    Log.w(TAG, String.format("Dictionary %s (%s) has no uri tag", slob.getId(), slob.getTags()), ex);
-                }
-            }
-
-            long t0 = System.currentTimeMillis();
+    @WorkerThread
+    protected void enableLinkHandling(Slob[] slobs) {
+        Set<String> hosts = new HashSet<>();
+        for (Slob slob : slobs) {
             try {
-                PackageManager pm = application.getPackageManager();
-                PackageInfo p = pm.getPackageInfo(BuildConfig.APPLICATION_ID,
-                        PackageManager.GET_ACTIVITIES | PackageManager.GET_DISABLED_COMPONENTS);
-                Log.d(TAG, "Done getting available activities in " + (System.currentTimeMillis() - t0));
-                t0 = System.currentTimeMillis();
+                String uriValue = slob.getTags().get(SlobTags.TAG_URI);
+                Uri uri = Uri.parse(uriValue);
+                String host = uri.getHost();
+                if (host != null) {
+                    hosts.add(host.toLowerCase(Locale.ROOT));
+                }
+            } catch (Exception ex) {
+                Log.w(TAG, String.format("Dictionary %s (%s) has no uri tag", slob.getId(), slob.getTags()), ex);
+            }
+        }
+
+        long t0 = System.currentTimeMillis();
+        try {
+            PackageManager pm = getPackageManager();
+            PackageInfo p = pm.getPackageInfo(BuildConfig.APPLICATION_ID,
+                    PackageManager.GET_ACTIVITIES | PackageManager.GET_DISABLED_COMPONENTS);
+            Log.d(TAG, "Done getting available activities in " + (System.currentTimeMillis() - t0));
+            t0 = System.currentTimeMillis();
+            if (p.activities != null) {
                 for (ActivityInfo activityInfo : p.activities) {
-                    if (isCancelled()) break;
+                    if (Thread.currentThread().isInterrupted()) break;
                     if (activityInfo.targetActivity != null) {
                         boolean enabled = hosts.contains(activityInfo.name);
                         if (enabled) {
                             Log.d(TAG, "Enabling links handling for " + activityInfo.name);
                         }
-                        int setting = enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-                        pm.setComponentEnabledSetting(new ComponentName(application, activityInfo.name), setting,
+                        int setting = enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                                : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+                        pm.setComponentEnabledSetting(new ComponentName(this, activityInfo.name), setting,
                                 PackageManager.DONT_KILL_APP);
                     }
                 }
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, e);
             }
-            Log.d(TAG, "Done enabling activities in " + (System.currentTimeMillis() - t0));
-            return null;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, e);
         }
+        Log.d(TAG, "Done enabling activities in " + (System.currentTimeMillis() - t0));
     }
 
     public static class ArticleCollectionActivityController implements ActivityLifecycleCallbacks {
@@ -221,6 +197,8 @@ public class Application extends android.app.Application {
                     activeActivities.get(0).finish();
                 }
             }
+            Window window = activity.getWindow();
+            WindowCompat.setDecorFitsSystemWindows(window, false);
         }
 
         @Override

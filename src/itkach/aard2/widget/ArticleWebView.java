@@ -443,7 +443,7 @@ public class ArticleWebView extends SearchableWebView {
         public void onPageFinished(WebView view, String url) {
             Log.d(TAG, "onPageFinished: " + url);
             if (!Utils.isNightMode(view.getContext())) {
-                view.setBackgroundColor(MaterialColors.getColor(view, R.attr.colorSurface));
+                view.setBackgroundColor(MaterialColors.getColor(view, com.google.android.material.R.attr.colorSurface));
             }
             if (url.startsWith("about:")) {
                 return;

@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,8 +53,9 @@ public final class SlobHelper {
     private final DescriptorStore<BlobDescriptor> historyStore;
     @NonNull
     private final DescriptorStore<SlobDescriptor> dictStore;
-    private final Map<String, Slob> slobMap = Collections.synchronizedMap(new HashMap<>());
-    private final List<Slob> slobs = Collections.synchronizedList(new ArrayList<>());
+    private final Object slobsLock = new Object();
+    private final Map<String, Slob> slobMap = new HashMap<>();
+    private final List<Slob> slobs = new ArrayList<>();
     private final Random random;
 
     @NonNull
@@ -79,7 +79,7 @@ public final class SlobHelper {
         historyStore = new DescriptorStore<>(mapper, application.getDir("history", Context.MODE_PRIVATE));
         dictionaries = new SlobDescriptorList(dictStore);
         bookmarks = new BlobDescriptorList(bookmarkStore);
-        history = new BlobDescriptorList(historyStore);
+        history = new HistoryBlobDescriptorList(historyStore);
         lastLookupResult = new LookupResult();
         random = new Random();
     }
@@ -132,16 +132,18 @@ public final class SlobHelper {
 
     public void updateSlobs() {
         checkInitialized();
-        slobs.clear();
-        slobMap.clear();
-        for (SlobDescriptor sd : dictionaries) {
-            Slob s = sd.load(application);
-            if (s != null) {
-                slobs.add(s);
+        synchronized (slobsLock) {
+            slobs.clear();
+            slobMap.clear();
+            for (SlobDescriptor sd : dictionaries) {
+                Slob s = sd.load(application);
+                if (s != null) {
+                    slobs.add(s);
+                }
             }
-        }
-        for (Slob s : slobs) {
-            slobMap.put(s.getId().toString(), s);
+            for (Slob s : slobs) {
+                slobMap.put(s.getId().toString(), s);
+            }
         }
     }
 
@@ -149,11 +151,13 @@ public final class SlobHelper {
     public Slob[] getActiveSlobs() {
         checkInitialized();
         List<Slob> result = new ArrayList<>(dictionaries.size());
-        for (SlobDescriptor sd : dictionaries) {
-            if (sd.active) {
-                Slob s = slobMap.get(sd.id);
-                if (s != null) {
-                    result.add(s);
+        synchronized (slobsLock) {
+            for (SlobDescriptor sd : dictionaries) {
+                if (sd.active) {
+                    Slob s = slobMap.get(sd.id);
+                    if (s != null) {
+                        result.add(s);
+                    }
                 }
             }
         }
@@ -164,11 +168,13 @@ public final class SlobHelper {
     public Slob[] getFavoriteSlobs() {
         checkInitialized();
         List<Slob> result = new ArrayList<>(dictionaries.size());
-        for (SlobDescriptor sd : dictionaries) {
-            if (sd.active && sd.priority > 0) {
-                Slob s = slobMap.get(sd.id);
-                if (s != null) {
-                    result.add(s);
+        synchronized (slobsLock) {
+            for (SlobDescriptor sd : dictionaries) {
+                if (sd.active && sd.priority > 0) {
+                    Slob s = slobMap.get(sd.id);
+                    if (s != null) {
+                        result.add(s);
+                    }
                 }
             }
         }
@@ -192,7 +198,9 @@ public final class SlobHelper {
     @Nullable
     public Slob getSlob(String slobId) {
         checkInitialized();
-        return slobMap.get(slobId);
+        synchronized (slobsLock) {
+            return slobMap.get(slobId);
+        }
     }
 
     @Nullable
@@ -205,9 +213,11 @@ public final class SlobHelper {
     @Nullable
     public Slob findSlobByUri(String slobURI) {
         checkInitialized();
-        for (Slob s : slobs) {
-            if (s.getURI().equals(slobURI)) {
-                return s;
+        synchronized (slobsLock) {
+            for (Slob s : slobs) {
+                if (s.getURI().equals(slobURI)) {
+                    return s;
+                }
             }
         }
         return null;
@@ -217,9 +227,11 @@ public final class SlobHelper {
     public List<Slob> findSlobsByUri(String uri) {
         checkInitialized();
         List<Slob> result = new ArrayList<>();
-        for (Slob s : slobs) {
-            if (s.getURI().equals(uri)) {
-                result.add(s);
+        synchronized (slobsLock) {
+            for (Slob s : slobs) {
+                if (s.getURI().equals(uri)) {
+                    result.add(s);
+                }
             }
         }
         return result;
@@ -280,8 +292,11 @@ public final class SlobHelper {
                                                   @Nullable Slob.Strength upToStrength) {
         checkInitialized();
         long t0 = System.currentTimeMillis();
-        Slob[] slobs = activeOnly ? getActiveSlobs() : this.slobs.toArray(new Slob[0]);
-        Slob.PeekableIterator<Slob.Blob> result = Slob.find(key, slobs, findSlob(preferredSlobId), upToStrength);
+        Slob[] targetSlobs;
+        synchronized (slobsLock) {
+            targetSlobs = activeOnly ? getActiveSlobs() : slobs.toArray(new Slob[0]);
+        }
+        Slob.PeekableIterator<Slob.Blob> result = Slob.find(key, targetSlobs, findSlob(preferredSlobId), upToStrength);
         Log.d(TAG, String.format("find ran in %dms", System.currentTimeMillis() - t0));
         return result;
     }

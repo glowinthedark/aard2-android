@@ -27,25 +27,25 @@ import itkach.aard2.utils.ThreadUtils;
 import itkach.aard2.utils.Utils;
 import itkach.slob.Slob;
 
-public final class BlobDescriptorList extends AbstractList<BlobDescriptor> {
+public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
     private static final String TAG = BlobDescriptorList.class.getSimpleName();
 
     enum SortOrder {
         TIME, NAME
     }
 
-    private final DescriptorStore<BlobDescriptor> store;
-    private final List<BlobDescriptor> list;
+    protected final DescriptorStore<BlobDescriptor> store;
+    protected final List<BlobDescriptor> list;
     private final List<BlobDescriptor> filteredList;
     private final DataSetObservable dataSetObservable;
     private final Comparator<BlobDescriptor> nameComparatorAsc;
     private final Comparator<BlobDescriptor> nameComparatorDesc;
     private final Comparator<BlobDescriptor> timeComparatorAsc;
     private final Comparator<BlobDescriptor> timeComparatorDesc;
-    private final Comparator<BlobDescriptor> lastAccessComparator;
+    protected final Comparator<BlobDescriptor> lastAccessComparator;
     private final Slob.KeyComparator keyComparator;
-    private final int maxSize;
-    private final RuleBasedCollator filterCollator;
+    protected final int maxSize;
+    private final RuleBasedCollatorCompat filterCollator;
 
     private String filter;
     private SortOrder order;
@@ -189,7 +189,7 @@ public final class BlobDescriptorList extends AbstractList<BlobDescriptor> {
         return blob;
     }
 
-    private BlobDescriptor createDescriptor(Uri contentUri) {
+    protected BlobDescriptor createDescriptor(Uri contentUri) {
         Log.d(TAG, "Create descriptor from content url: " + contentUri);
         BlobDescriptor bd = BlobDescriptor.fromUri(contentUri);
         if (bd != null) {
