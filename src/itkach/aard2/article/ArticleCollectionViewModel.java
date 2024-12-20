@@ -155,6 +155,8 @@ public class ArticleCollectionViewModel extends AndroidViewModel {
         LookupResult lookupResult = new LookupResult(20, 1);
         Iterator<Slob.Blob> result = stemLookup(lookupKey, preferredSlobId);
         lookupResult.setResult(result);
+        // Update the query for the main activity
+        ((itkach.aard2.Application) getApplication()).lookupAsync(lookupKey);
         return new LookupResultWrapper(lookupResult, item -> item);
     }
 
