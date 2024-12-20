@@ -53,6 +53,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
     private ArticleCollectionPagerAdapter pagerAdapter;
     private ViewPager viewPager;
     private ArticleCollectionViewModel viewModel;
+    private boolean isHistory;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
 
         final Intent intent = getIntent();
         final int position = intent.getIntExtra("position", 0);
+        isHistory = ArticleCollectionActivity.ACTION_HISTORY.equals(intent.getAction());
 
         viewModel.getBlobListLiveData().observe(this, blobListWrapper -> {
             if (blobListWrapper == null) {
@@ -151,7 +153,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
         if (blob != null) {
             String dictLabel = blob.owner.getTags().get(SlobTags.TAG_LABEL);
             actionBar.setTitle(dictLabel);
-            if (!AppPrefs.disableHistory()) {
+            if (!AppPrefs.disableHistory() && !isHistory) {
                 SlobHelper slobHelper = SlobHelper.getInstance();
                 slobHelper.history.add(slobHelper.getHttpUri(blob));
             }

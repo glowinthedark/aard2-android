@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -80,7 +79,7 @@ public final class SlobHelper {
         historyStore = new DescriptorStore<>(mapper, application.getDir("history", Context.MODE_PRIVATE));
         dictionaries = new SlobDescriptorList(dictStore);
         bookmarks = new BlobDescriptorList(bookmarkStore);
-        history = new BlobDescriptorList(historyStore);
+        history = new HistoryBlobDescriptorList(historyStore);
         lastLookupResult = new LookupResult();
         random = new Random();
     }
