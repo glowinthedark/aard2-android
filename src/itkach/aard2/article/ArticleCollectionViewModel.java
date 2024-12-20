@@ -16,6 +16,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import itkach.aard2.descriptor.BlobDescriptor;
 import itkach.aard2.R;
@@ -118,7 +119,7 @@ public class ArticleCollectionViewModel extends AndroidViewModel {
     @NonNull
     private BlobListWrapper createFromIntent(@NonNull Intent intent) {
         String lookupKey = intent.getStringExtra(Intent.EXTRA_TEXT);
-        if (intent.getAction().equals(Intent.ACTION_PROCESS_TEXT)) {
+        if (Objects.equals(intent.getAction(), Intent.ACTION_PROCESS_TEXT)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 lookupKey = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT).toString();
             }
@@ -147,11 +148,11 @@ public class ArticleCollectionViewModel extends AndroidViewModel {
                 }
             }
         }
-        LookupResult lookupResult = new LookupResult(20, 1);
-        if (lookupKey == null || lookupKey.length() == 0) {
+        if (TextUtils.isEmpty(lookupKey)) {
             String msg = application.getString(R.string.article_collection_nothing_to_lookup);
             throw new RuntimeException(msg);
         }
+        LookupResult lookupResult = new LookupResult(20, 1);
         Iterator<Slob.Blob> result = stemLookup(lookupKey, preferredSlobId);
         lookupResult.setResult(result);
         return new LookupResultWrapper(lookupResult, item -> item);
