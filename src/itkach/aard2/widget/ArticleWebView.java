@@ -49,7 +49,7 @@ import itkach.aard2.article.ArticleCollectionActivity;
 import itkach.aard2.descriptor.BlobDescriptor;
 import itkach.aard2.prefs.ArticleViewPrefs;
 import itkach.aard2.prefs.UserStylesPrefs;
-import itkach.aard2.utils.StyleJsUtils;
+import itkach.aard2.utils.AssetUtils;
 import itkach.aard2.utils.Utils;
 
 public class ArticleWebView extends SearchableWebView {
@@ -235,10 +235,10 @@ public class ArticleWebView extends SearchableWebView {
         if (UserStylesPrefs.hasStyle(styleTitle)) {
             String css = UserStylesPrefs.getStylesheet(styleTitle);
             String elementId = getCurrentSlobId();
-            js = String.format("javascript:" + StyleJsUtils.getUserStyleJs(), elementId, css);
+            js = String.format("javascript:" + AssetUtils.getAssetAsString("userstyle.min.js"), elementId, css);
         } else {
             js = String.format(
-                    "javascript:" + StyleJsUtils.getClearUserStyleJs() + StyleJsUtils.getSetCannedStyleJs(),
+                    "javascript:" + AssetUtils.getAssetAsString("clearuserstyle.min.js") + AssetUtils.getAssetAsString("setcannedstyle.min.js"),
                     getCurrentSlobId(), styleTitle);
         }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -430,7 +430,7 @@ public class ArticleWebView extends SearchableWebView {
                 tsList = new ArrayList<>();
                 times.put(url, tsList);
                 tsList.add(System.currentTimeMillis());
-                view.loadUrl("javascript:" + StyleJsUtils.getStyleSwitcherJs());
+                view.loadUrl("javascript:" + AssetUtils.getAssetAsString("styleswitcher.min.js"));
                 try {
                     timer.schedule(applyStylePref, 250, 200);
                 } catch (IllegalStateException ex) {
@@ -460,8 +460,8 @@ public class ArticleWebView extends SearchableWebView {
             } else {
                 Log.w(TAG, "onPageFinished: Unexpected page finished event for " + url);
             }
-            view.loadUrl("javascript:" + StyleJsUtils.getStyleSwitcherJs() + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());" +
-                    "(function(){document.onclick=function(e){if(['BODY','A','IMG','BUTTON','INPUT','FIGURE'].indexOf(e.target.tagName)!=-1||e.target.closest('a')){console.log(`SKIP ${e.target.tagName}`);return}var selection=window.getSelection();selection.modify('extend','left','word');var left=selection.toString();selection.modify('extend','right','word');selection.modify('extend','right','word');var right=selection.toString().split(/[\\s'\"!\"#$%&\\'()*+,./:;<=>?@\\[\\]^_\\`{|}~\\s\\t\\r\\n!?.,;:<>'‘’‚‛“”„‟‹›❮❯]/)[0];var word=left+right;selection.removeAllRanges();if(word&&word.length>1){$SLOB.onWordTapped(word)}}})();");
+            view.loadUrl("javascript:" + AssetUtils.getAssetAsString("styleswitcher.min.js") + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());" +
+                    AssetUtils.getAssetAsString("touchhandler.min.js"));
             applyStylePref();
         }
 
