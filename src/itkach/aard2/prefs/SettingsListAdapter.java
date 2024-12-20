@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.LinearLayoutCompat;
-import androidx.core.app.ActivityCompat;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,10 +51,11 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     final static int POS_FAV_RANDOM = 3;
     final static int POS_USE_VOLUME_FOR_NAV = 4;
     final static int POS_AUTO_PASTE = 5;
-    final static int POS_DISABLE_JS = 6;
-    final static int POS_USER_STYLES = 7;
-    final static int POS_CLEAR_CACHE = 8;
-    final static int POS_ABOUT = 9;
+    final static int POS_DISABLE_HISTORY = 6;
+    final static int POS_DISABLE_JS = 7;
+    final static int POS_USER_STYLES = 8;
+    final static int POS_CLEAR_CACHE = 9;
+    final static int POS_ABOUT = 10;
 
     SettingsListAdapter(Fragment fragment) {
         this.fragment = fragment;
@@ -95,11 +95,11 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
             case POS_REMOTE_CONTENT:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.settings_remote_content_item, parent, false);
                 break;
-            default:
             case POS_FORCE_DARK:
             case POS_FAV_RANDOM:
             case POS_USE_VOLUME_FOR_NAV:
             case POS_AUTO_PASTE:
+            case POS_DISABLE_HISTORY:
             case POS_DISABLE_JS:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.settings_switch, parent, false);
                 break;
@@ -112,6 +112,8 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
             case POS_ABOUT:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.settings_about_item, parent, false);
                 break;
+            default:
+                throw new RuntimeException("Invalid view type " + viewType);
         }
         return new ViewHolder(view);
     }
@@ -136,6 +138,9 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                 break;
             case POS_AUTO_PASTE:
                 getAutoPasteView(holder);
+                break;
+            case POS_DISABLE_HISTORY:
+                getDisableHistoryView(holder);
                 break;
             case POS_DISABLE_JS:
                 getDisableJavaScriptView(holder);
@@ -240,6 +245,21 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
         toggle.setChecked(AppPrefs.autoPasteInLookup());
     }
 
+    private void getDisableHistoryView(@NonNull ViewHolder holder) {
+        View view = holder.itemView;
+        MaterialSwitch toggle;
+        toggle = view.findViewById(R.id.setting_switch);
+        toggle.setText(R.string.setting_disable_history);
+        toggle.setOnClickListener(v -> {
+            boolean currentValue = AppPrefs.disableHistory();
+            boolean newValue = !currentValue;
+            AppPrefs.setDisableHistory(newValue);
+            toggle.setChecked(newValue);
+        });
+        view.findViewById(R.id.setting_subtitle).setVisibility(View.GONE);
+        toggle.setChecked(AppPrefs.disableHistory());
+    }
+
     private void getDisableJavaScriptView(@NonNull ViewHolder holder) {
         View view = holder.itemView;
         MaterialSwitch toggle;
@@ -275,7 +295,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
         Collections.sort(userStyleNames);
 
         View emptyView = view.findViewById(R.id.setting_user_styles_empty);
-        emptyView.setVisibility(userStyleNames.size() == 0 ? View.VISIBLE : View.GONE);
+        emptyView.setVisibility(userStyleNames.isEmpty() ? View.VISIBLE : View.GONE);
 
         LinearLayoutCompat userStyleListLayout = view.findViewById(R.id.setting_user_styles_list);
         userStyleListLayout.removeAllViews();

@@ -2,6 +2,9 @@ package itkach.aard2.prefs;
 
 import androidx.annotation.NonNull;
 
+import itkach.aard2.SlobHelper;
+import itkach.aard2.utils.ThreadUtils;
+
 public class AppPrefs extends Prefs {
     private static final String PREF_UI_THEME = "UITheme";
     private static final String PREF_QUERY = "query";
@@ -65,5 +68,15 @@ public class AppPrefs extends Prefs {
 
     public static void setAutoPasteInLookup(boolean autoPasteInLookup) {
         getInstance().prefs.edit().putBoolean(PREF_AUTO_PASTE, autoPasteInLookup).apply();
+    }
+
+
+    public static boolean disableHistory() {
+        return getInstance().prefs.getBoolean("disable_history", false);
+    }
+
+    public static void setDisableHistory(boolean disableJavaScript) {
+        getInstance().prefs.edit().putBoolean("disable_history", disableJavaScript).apply();
+        ThreadUtils.postOnBackgroundThread(() -> SlobHelper.getInstance().history.clear());
     }
 }

@@ -151,8 +151,10 @@ public class ArticleCollectionActivity extends AppCompatActivity
         if (blob != null) {
             String dictLabel = blob.owner.getTags().get(SlobTags.TAG_LABEL);
             actionBar.setTitle(dictLabel);
-            SlobHelper slobHelper = SlobHelper.getInstance();
-            slobHelper.history.add(slobHelper.getHttpUri(blob));
+            if (!AppPrefs.disableHistory()) {
+                SlobHelper slobHelper = SlobHelper.getInstance();
+                slobHelper.history.add(slobHelper.getHttpUri(blob));
+            }
         } else {
             actionBar.setTitle("???");
         }
