@@ -1,5 +1,6 @@
 package itkach.aard2.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -13,11 +14,15 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,6 +59,25 @@ import itkach.aard2.utils.Utils;
 
 public class ArticleWebView extends SearchableWebView {
     public static final String TAG = ArticleWebView.class.getSimpleName();
+
+    @Override
+    public void setWebChromeClient(@Nullable WebChromeClient client) {
+        super.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                Log.i(TAG, "DBG: Progress=" + newProgress);
+                super.onProgressChanged(view, newProgress);
+            }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Log.i(TAG, consoleMessage.message() + consoleMessage.sourceId() + consoleMessage.lineNumber());
+
+                return super.onConsoleMessage(consoleMessage);
+
+            }
+        });
+    }
 
     public static final String LOCALHOST = SlobHelper.LOCALHOST;
 
@@ -164,7 +188,7 @@ public class ArticleWebView extends SearchableWebView {
                     resultType,
                     hitTestResult.getExtra()));
             if (resultType == HitTestResult.SRC_ANCHOR_TYPE ||
-                    resultType == HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
+                        resultType == HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
                 String url = hitTestResult.getExtra();
                 Uri uri = Uri.parse(url);
                 if (isExternal(uri)) {
@@ -235,10 +259,10 @@ public class ArticleWebView extends SearchableWebView {
         if (UserStylesPrefs.hasStyle(styleTitle)) {
             String css = UserStylesPrefs.getStylesheet(styleTitle);
             String elementId = getCurrentSlobId();
-            js = String.format("javascript:" + AssetUtils.getAssetAsString("userstyle.min.js"), elementId, css);
+            js = String.format("javascript:" + AssetUtils.getAssetAsString("userstyle.js"), elementId, css);
         } else {
             js = String.format(
-                    "javascript:" + AssetUtils.getAssetAsString("clearuserstyle.min.js") + AssetUtils.getAssetAsString("setcannedstyle.min.js"),
+                    "javascript:" + AssetUtils.getAssetAsString("clearuserstyle.js") + AssetUtils.getAssetAsString("setcannedstyle.js"),
                     getCurrentSlobId(), styleTitle);
         }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -311,7 +335,13 @@ public class ArticleWebView extends SearchableWebView {
         Log.d(TAG, "Word tapped! " + tappedWord);
 
         if (!TextUtils.isEmpty(tappedWord) && tappedWord.length() > 1) {
-            Application.get().lookupAsync(tappedWord);
+            Activity activity = (Activity) getContext();
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    Toast.makeText(activity, "Look up: " + tappedWord, Toast.LENGTH_SHORT).show();
+                    Application.get().lookupAsync(tappedWord);
+                });
+            }
         }
     }
 
@@ -430,7 +460,7 @@ public class ArticleWebView extends SearchableWebView {
                 tsList = new ArrayList<>();
                 times.put(url, tsList);
                 tsList.add(System.currentTimeMillis());
-                view.loadUrl("javascript:" + AssetUtils.getAssetAsString("styleswitcher.min.js"));
+                view.loadUrl("javascript:" + AssetUtils.getAssetAsString("styleswitcher.js"));
                 try {
                     timer.schedule(applyStylePref, 250, 200);
                 } catch (IllegalStateException ex) {
@@ -460,8 +490,15 @@ public class ArticleWebView extends SearchableWebView {
             } else {
                 Log.w(TAG, "onPageFinished: Unexpected page finished event for " + url);
             }
-            view.loadUrl("javascript:" + AssetUtils.getAssetAsString("styleswitcher.min.js") + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());" +
-                    AssetUtils.getAssetAsString("touchhandler.min.js"));
+
+            String js = AssetUtils.getAssetAsString("styleswitcher.js") + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());" +
+                                AssetUtils.getAssetAsString("touchhandler.js");
+            view.evaluateJavascript(js, new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    Log.d(TAG, "callback result: " + value);
+                }
+            });
             applyStylePref();
         }
 
@@ -500,9 +537,9 @@ public class ArticleWebView extends SearchableWebView {
                 Uri current = Uri.parse(view.getUrl());
                 Log.d(TAG, "shouldOverrideUrlLoading URL with fragment: " + uri);
                 if (scheme.equals(current.getScheme()) &&
-                        host.equals(current.getHost()) &&
-                        uri.getPort() == current.getPort() &&
-                        uri.getPath().equals(current.getPath())) {
+                            host.equals(current.getHost()) &&
+                            uri.getPort() == current.getPort() &&
+                            uri.getPath().equals(current.getPath())) {
                     Log.d(TAG, "NOT overriding loading of same page link " + uri);
                     return false;
                 }
