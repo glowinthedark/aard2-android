@@ -14,10 +14,8 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -59,25 +57,6 @@ import itkach.aard2.utils.Utils;
 
 public class ArticleWebView extends SearchableWebView {
     public static final String TAG = ArticleWebView.class.getSimpleName();
-
-    @Override
-    public void setWebChromeClient(@Nullable WebChromeClient client) {
-        super.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                Log.i(TAG, "DBG: Progress=" + newProgress);
-                super.onProgressChanged(view, newProgress);
-            }
-
-            @Override
-            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                Log.i(TAG, consoleMessage.message() + consoleMessage.sourceId() + consoleMessage.lineNumber());
-
-                return super.onConsoleMessage(consoleMessage);
-
-            }
-        });
-    }
 
     public static final String LOCALHOST = SlobHelper.LOCALHOST;
 
