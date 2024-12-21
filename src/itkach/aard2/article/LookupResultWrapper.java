@@ -42,7 +42,10 @@ class LookupResultWrapper implements BlobListWrapper {
     @Nullable
     @Override
     public CharSequence getLabel(int index) {
-        Slob.Blob item = lookupResult.getList().get(index);
+        Slob.Blob item = null;
+        if(index < lookupResult.getList().size()) {
+            item = lookupResult.getList().get(index);
+        }
         return item != null ? item.key : null;
     }
 
