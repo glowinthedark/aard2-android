@@ -50,6 +50,7 @@ import itkach.aard2.R;
 import itkach.aard2.SlobHelper;
 import itkach.aard2.article.ArticleCollectionActivity;
 import itkach.aard2.descriptor.BlobDescriptor;
+import itkach.aard2.prefs.AppPrefs;
 import itkach.aard2.prefs.ArticleViewPrefs;
 import itkach.aard2.prefs.UserStylesPrefs;
 import itkach.aard2.utils.AssetUtils;
@@ -311,7 +312,7 @@ public class ArticleWebView extends SearchableWebView {
 
     @JavascriptInterface
     public void onWordTapped(String tappedWord) {
-        Log.d(TAG, "Word tapped! " + tappedWord);
+        Log.d(TAG, "Word tapped: " + tappedWord);
 
         if (!TextUtils.isEmpty(tappedWord) && tappedWord.length() > 1) {
             Activity activity = (Activity) getContext();
@@ -470,8 +471,11 @@ public class ArticleWebView extends SearchableWebView {
                 Log.w(TAG, "onPageFinished: Unexpected page finished event for " + url);
             }
 
-            String js = AssetUtils.getAssetAsString("styleswitcher.js") + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());" +
-                                AssetUtils.getAssetAsString("touchhandler.js");
+            String js = AssetUtils.getAssetAsString("styleswitcher.js") + ";$SLOB.setStyleTitles($styleSwitcher.getTitles());";
+
+            if (AppPrefs.getTapToSearch()) {
+                js += AssetUtils.getAssetAsString("touchhandler.js");
+            }
             view.evaluateJavascript(js, new ValueCallback<String>() {
                 @Override
                 public void onReceiveValue(String value) {

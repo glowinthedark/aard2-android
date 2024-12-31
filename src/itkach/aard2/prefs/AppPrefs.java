@@ -75,6 +75,13 @@ public class AppPrefs extends Prefs {
         return getInstance().prefs.getBoolean("disable_history", false);
     }
 
+    public static boolean getTapToSearch() {
+        return getInstance().prefs.getBoolean("is_taptosearch_enabled", true);
+    }
+    public static void setTapToSearch(boolean isTapToSearchEnabled) {
+        getInstance().prefs.edit().putBoolean("is_taptosearch_enabled", isTapToSearchEnabled).apply();
+    }
+
     public static void setDisableHistory(boolean disableJavaScript) {
         getInstance().prefs.edit().putBoolean("disable_history", disableJavaScript).apply();
         ThreadUtils.postOnBackgroundThread(() -> SlobHelper.getInstance().history.clear());
