@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Aardict</string>
     <string name="subtitle_lookup">Поиск</string>
     <string name="subtitle_bookmark">Закладки</string>
     <string name="subtitle_history">История</string>

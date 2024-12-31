@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.ActionMode
 import android.view.Menu
@@ -149,10 +148,12 @@ abstract class BlobDescriptorListFragment : BaseListFragment() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.blob_descriptor_list, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onPrepareOptionsMenu(menu: Menu) {
         val list = descriptorList
 
@@ -219,6 +220,7 @@ abstract class BlobDescriptorListFragment : BaseListFragment() {
         editor.commit()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(mi: MenuItem): Boolean {
         val list = descriptorList
         val itemId = mi.itemId

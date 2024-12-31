@@ -45,6 +45,7 @@ class SettingsFragment : ListFragment() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode != SettingsListAdapter.CSS_SELECT_REQUEST) {
             Log.d(TAG, String.format("Unknown request code: %d", requestCode))

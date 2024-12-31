@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View.OnLongClickListener
@@ -16,20 +17,22 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import java.io.ByteArrayInputStream
 import java.util.Arrays
-import java.util.Collections
 import java.util.Locale
 import java.util.SortedSet
 import java.util.Timer
 import java.util.TimerTask
 import java.util.TreeSet
 
+
 class ArticleWebView(context: Context, attrs: AttributeSet? = null) :
     SearchableWebView(context, attrs) {
     private val styleSwitcherJs = Application.jsStyleSwitcher
+    private val tapToSearchJs = Application.jsTapToSearch
     private val defaultStyleTitle: String
     private val autoStyleTitle: String
 
@@ -84,6 +87,35 @@ class ArticleWebView(context: Context, attrs: AttributeSet? = null) :
         }
     }
 
+    @JavascriptInterface
+    fun onWordTapped(tappedWord: String) {
+        Log.d(TAG, "Word tapped! $tappedWord")
+        var scheduledLookup: TimerTask? = null
+
+        if (!TextUtils.isEmpty(tappedWord) && tappedWord.length > 1) {
+            Toast.makeText(application, "Look up: $tappedWord", Toast.LENGTH_SHORT).show()
+
+            Log.d(TAG, "query from jsTappedWord: $tappedWord")
+            val doLookup: TimerTask = object : TimerTask() {
+                override fun run() {
+                    if (application.lookupQuery == tappedWord) {
+                        return
+                    }
+
+                    (context as Activity).runOnUiThread { application.lookup(tappedWord, false) }
+                    scheduledLookup = null
+                }
+            }
+            if (application.lookupQuery != tappedWord) {
+                if (scheduledLookup != null) {
+                    scheduledLookup!!.cancel()
+                }
+                scheduledLookup = doLookup
+                timer!!.schedule(doLookup, 600)
+            }
+        }
+    }
+
     init {
         val settings = this.settings
         settings.javaScriptEnabled = true
@@ -130,7 +162,7 @@ class ArticleWebView(context: Context, attrs: AttributeSet? = null) :
                     val tsList: MutableList<Long> = ArrayList()
                     tsList.add(System.currentTimeMillis())
                     times[url] = tsList
-                    view.loadUrl("javascript:$styleSwitcherJs")
+                    view.loadUrl("javascript:$styleSwitcherJs;$tapToSearchJs;")
                     try {
                         timer.schedule(applyStylePref, 0, 10)
                     } catch (ex: IllegalStateException) {
@@ -166,6 +198,7 @@ class ArticleWebView(context: Context, attrs: AttributeSet? = null) :
                 applyStylePref()
             }
 
+            @Deprecated("Deprecated in Java")
             override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? {
                 val parsed: Uri
                 try {
@@ -190,6 +223,7 @@ class ArticleWebView(context: Context, attrs: AttributeSet? = null) :
                 )
             }
 
+            @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(
                 view: WebView,
                 url: String

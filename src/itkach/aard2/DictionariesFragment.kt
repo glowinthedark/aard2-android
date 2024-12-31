@@ -63,6 +63,7 @@ class DictionariesFragment : BaseListFragment() {
         inflater.inflate(R.menu.dictionaries, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onPrepareOptionsMenu(menu: Menu) {
         val activity = activity
         val miAddDictionaries = menu.findItem(R.id.action_add_dictionaries)

@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.database.DataSetObserver
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -37,8 +36,6 @@ import itkach.slob.Slob.PeekableIterator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChangeListener,
@@ -305,19 +302,26 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
 
     private fun updateTitle(position: Int) {
         Log.d("updateTitle", "" + position + " count: " + articleCollectionPagerAdapter!!.itemCount)
-        val blob = articleCollectionPagerAdapter!!.get(position)
-        val pageTitle = articleCollectionPagerAdapter!!.getPageTitle(position)
-        Log.d("updateTitle", "" + blob)
-        val actionBar = supportActionBar
-        if (blob != null) {
-            val dictLabel = blob.owner.tags["label"]
-            actionBar!!.title = dictLabel
-            val app = application as Application
-            app.history!!.add(app.getUrl(blob))
-        } else {
-            actionBar!!.setTitle("???")
+        if (articleCollectionPagerAdapter!!.itemCount == 0 || position !in 0 until articleCollectionPagerAdapter!!.itemCount) {
+            return
         }
-        actionBar.subtitle = pageTitle
+        try {
+            val blob = articleCollectionPagerAdapter!!.get(position)
+            val pageTitle = articleCollectionPagerAdapter!!.getPageTitle(position)
+            Log.d("updateTitle", "" + blob)
+            val actionBar = supportActionBar
+            if (blob != null) {
+                val dictLabel = blob.owner.tags["label"]
+                actionBar!!.title = dictLabel
+                val app = application as Application
+                app.history!!.add(app.getUrl(blob))
+            } else {
+                actionBar!!.setTitle("???")
+            }
+            actionBar.subtitle = pageTitle
+        } catch (e: Exception) {
+            Log.e(TAG, "TODO: FIXME!!!")
+        }
     }
 
 
@@ -417,6 +421,7 @@ class ArticleCollectionActivity : AppCompatActivity(), OnSystemUiVisibilityChang
         return super.onOptionsItemSelected(item)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onSystemUiVisibilityChange(visibility: Int) {
         if (isFinishing) {
             return

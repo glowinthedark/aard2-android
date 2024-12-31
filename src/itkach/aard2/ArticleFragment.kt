@@ -32,6 +32,7 @@ class ArticleFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         //Looks like this may be called multiple times with the same menu
         //for some reason when activity is restored, so need to clear
@@ -50,6 +51,7 @@ class ArticleFragment : Fragment() {
         miBookmark.setChecked(value).setIcon(if (value) R.drawable.bookmark_fill_24px else R.drawable.bookmark_24px)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val webView = webView  ?: return false
 
@@ -162,6 +164,7 @@ class ArticleFragment : Fragment() {
         applyStylePref()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         if (this.url == null) {

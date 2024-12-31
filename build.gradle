@@ -1,6 +1,6 @@
 plugins {
-    id 'com.android.application' version '8.4.2'
-    id 'org.jetbrains.kotlin.android' version '1.8.0'
+    id 'com.android.application' version '8.7.3'
+    id 'org.jetbrains.kotlin.android' version '1.9.25'
 }
 
 repositories {
@@ -53,7 +53,17 @@ android {
                 if (keyPassword == null) {
                     keyPassword = storePassword
                 }
-                keyAlias "aard2-android"
+                keyAlias System.getenv("KEY_ALIAS")
+            }
+
+            debug {
+                storeFile file(System.getenv("KEYSTORE"))
+                storePassword System.getenv("STORE_PASSWORD")
+                keyPassword System.getenv("KEY_PASSWORD")
+                if (keyPassword == null) {
+                    keyPassword = storePassword
+                }
+                keyAlias System.getenv("KEY_ALIAS")
             }
         }
     }
@@ -71,13 +81,19 @@ android {
         compileSdk 35
         versionName "1.0.3"
         versionCode  61
-        applicationId "com.akylas.aard2"
+        applicationId "com.legbehindneck.aard2"
+        applicationIdSuffix 'darkmod'
+        setProperty("archivesBaseName", "aard2vark-" + versionCode + "-" + applicationIdSuffix)
     }
     lint {
         abortOnError false
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
 }
@@ -88,12 +104,12 @@ dependencies {
     implementation "androidx.webkit:webkit:1.12.1"
     implementation "androidx.appcompat:appcompat:1.7.0"
     implementation "androidx.viewpager2:viewpager2:1.1.0"
-    implementation "androidx.navigation:navigation-ui-ktx:2.8.4"
-    implementation "androidx.navigation:navigation-fragment-ktx:2.8.4"
-    implementation "androidx.navigation:navigation-runtime-ktx:2.8.4"
-    api 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
-    api 'com.fasterxml.jackson.core:jackson-core:2.11.1'
-    api 'com.fasterxml.jackson.core:jackson-annotations:2.11.1'
+    implementation "androidx.navigation:navigation-ui-ktx:2.8.5"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.8.5"
+    implementation "androidx.navigation:navigation-runtime-ktx:2.8.5"
+    api 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    api 'com.fasterxml.jackson.core:jackson-core:2.18.2'
+    api 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
     api 'com.github.kazy1991:FontDrawable:0.9.5'
     api project(':slobj')
     api project(':slobber')
