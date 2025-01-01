@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.ConnectivityManager
@@ -125,6 +126,13 @@ class ArticleWebView(context: Context, attrs: AttributeSet? = null) :
 
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+        } else if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+            val nightModeFlags =
+                getResources().getConfiguration().uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+                //Theme is switched to Night/Dark mode, turn on webview darkening
+                WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
+            }
         }
 
         val r = resources
@@ -162,7 +170,11 @@ class ArticleWebView(context: Context, attrs: AttributeSet? = null) :
                     val tsList: MutableList<Long> = ArrayList()
                     tsList.add(System.currentTimeMillis())
                     times[url] = tsList
-                    view.loadUrl("javascript:$styleSwitcherJs;$tapToSearchJs;")
+                    var js = "javascript:$styleSwitcherJs;"
+                    if (application.tapToSearch()) {
+                        js += tapToSearchJs
+                    }
+                    view.loadUrl(js)
                     try {
                         timer.schedule(applyStylePref, 0, 10)
                     } catch (ex: IllegalStateException) {

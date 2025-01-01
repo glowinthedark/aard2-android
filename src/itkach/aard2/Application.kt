@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import itkach.slob.Slob
 import itkach.slob.Slob.PeekableIterator
 import itkach.slobber.Slobber
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -141,8 +140,8 @@ class Application : android.app.Application() {
                             //dictionary file has been replaced
                             //(same file name, different slob uuid)
                             //need to update store accordingly
-                            dictStore!!.delete(origSlobId);
-                            dictStore!!.save(sd);
+                            dictStore!!.delete(origSlobId)
+                            dictStore!!.save(sd)
                         }
                         slobs.add(s)
                     }
@@ -348,7 +347,7 @@ class Application : android.app.Application() {
         val prefs = prefs()
         val editor = prefs.edit()
         editor.putBoolean(PREF_USE_VOLUME_FOR_NAV, value)
-        editor.commit()
+        editor.apply()
     }
 
     fun autoPaste(): Boolean {
@@ -360,7 +359,19 @@ class Application : android.app.Application() {
         val prefs = prefs()
         val editor = prefs.edit()
         editor.putBoolean(PREF_AUTO_PASTE, value)
-        editor.commit()
+        editor.apply()
+    }
+
+    fun tapToSearch(): Boolean {
+        val prefs = prefs()
+        return prefs.getBoolean(PREF_TAP_TO_SEARCH, false)
+    }
+
+    fun setTapToSearch(value: Boolean) {
+        val prefs = prefs()
+        val editor = prefs.edit()
+        editor.putBoolean(PREF_TAP_TO_SEARCH, value)
+        editor.apply()
     }
 
 
@@ -576,6 +587,7 @@ class Application : android.app.Application() {
         const val PREF_UI_THEME_DARK: String = "dark"
         const val PREF_USE_VOLUME_FOR_NAV: String = "useVolumeForNav"
         const val PREF_AUTO_PASTE: String = "autoPaste"
+        const val PREF_TAP_TO_SEARCH: String = "tapToSearch"
 
         private val TAG: String = Application::class.java.simpleName
 

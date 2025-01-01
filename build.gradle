@@ -69,8 +69,10 @@ android {
     }
 
     buildTypes {
-        if (System.getenv("KEYSTORE") != null) {
-            release {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            if (System.getenv("KEYSTORE") != null) {
                 signingConfig signingConfigs.release
             }
         }
@@ -81,9 +83,9 @@ android {
         compileSdk 35
         versionName "1.0.3"
         versionCode  61
-        applicationId "com.legbehindneck.aard2"
-        applicationIdSuffix 'darkmod'
-        setProperty("archivesBaseName", "aard2vark-" + versionCode + "-" + applicationIdSuffix)
+        applicationId "com.legbehindneck.aard2kot"
+        applicationIdSuffix 'darktouch'
+        setProperty("archivesBaseName", "aard2kot-" + versionCode + "-" + applicationIdSuffix)
     }
     lint {
         abortOnError false
@@ -92,10 +94,9 @@ android {
         jvmTarget = '17'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-
 }
 
 dependencies {

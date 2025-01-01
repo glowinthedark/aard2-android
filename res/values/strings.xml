@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="app_name" tools:ignore="MissingTranslation">Aard2vark</string>
+    <string name="app_name" tools:ignore="MissingTranslation">Aard2vak</string>
     <string name="subtitle_lookup">Lookup</string>
     <string name="subtitle_bookmark">Bookmarks</string>
     <string name="subtitle_history">History</string>
@@ -41,16 +41,16 @@
     <string name="setting_remote_content_never">Never</string>
     <string name="setting_remote_content">Load Remote Content</string>
     <string name="setting_about">About %1$s</string>
-    <string name="application_home_url" translatable="false">http://aarddict.org</string>
+    <string name="application_home_url" translatable="false">https://aarddict.org</string>
     <string name="application_copyright" translatable="false">Igor Tkach</string>
-    <string name="application_license_name" tools:ignore="MissingTranslation">GNU General Public License v3</string>
-    <string name="application_license_url" tools:ignore="MissingTranslation">https://gnu.org/licenses/gpl.html</string>
+    <string name="application_license_name" translatable="false">GNU General Public License v3</string>
+    <string name="application_license_url" translatable="false">https://gnu.org/licenses/gpl.html</string>
     <string name="application_license" translatable="false">
         <![CDATA[
             <a href="%1$s">%2$s</a>
         ]]>
     </string>
-    <string name="application_version">Version %1$s</string>
+    <string name="application_version" translatable="false">Version %1$s</string>
     <string name="setting_clear_cache">Clear Cache</string>
     <string name="setting_clear_cache_subtitle">Delete cached content including remote images</string>
     <string name="confirm_clear_cached_content">Clear cached content?</string>
@@ -113,4 +113,16 @@
     <string name="find_hint">Find in page</string>
     <string name="find_next">Next</string>
     <string name="find_previous">Previous</string>
+    <string name="setting_ui_theme_auto">Auto</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
+    <string name="setting_enable_force_dark_web_view">Enable force dark in webview in dark mode</string>
+    <string name="setting_disable_javascript_title">Disable JavaScript</string>
+    <string name="setting_disable_javascript_subtitle">Disabling JavaScript has unintended side effects such as applying custom styles and loading remote contents.</string>
+    <string name="specified_number_of_items_selected">%d selected</string>
+    <string name="action_open_random_article">Random article</string>
+    <string name="setting_disable_history">Disable history</string>
+    <string name="setting_taptosearch_subtitle">Tap to search</string>
+    <string name="setting_disable_taptosearch_subtitle">Disable tap to search</string>
+    <string name="setting_tap_to_search">Tap to search</string>
 </resources>

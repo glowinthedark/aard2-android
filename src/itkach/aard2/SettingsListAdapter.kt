@@ -15,7 +15,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.CheckedTextView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -77,6 +76,7 @@ class SettingsListAdapter internal constructor(private val fragment: Fragment) :
             POS_FAV_RANDOM -> getFavRandomSwitchView(convertView, parent)
             POS_USE_VOLUME_FOR_NAV -> getUseVolumeForNavView(convertView, parent)
             POS_AUTO_PASTE -> getAutoPasteView(convertView, parent)
+            POS_TAPTOSEACH -> getTapToSearchToggleView(convertView, parent)
             POS_USER_STYLES -> getUserStylesView(convertView, parent)
             POS_CLEAR_CACHE -> getClearCacheView(convertView, parent)
             POS_ABOUT -> getAboutView(convertView, parent)
@@ -118,7 +118,7 @@ class SettingsListAdapter internal constructor(private val fragment: Fragment) :
                 Log.d("Settings", Application.PREF_UI_THEME + ": " + value)
                 if (value != null) {
                     editor.putString(Application.PREF_UI_THEME, value)
-                    editor.commit()
+                    editor.apply()
                 }
                 context!!.recreate()
             }
@@ -213,6 +213,32 @@ class SettingsListAdapter internal constructor(private val fragment: Fragment) :
         }
         val currentValue = app.autoPaste()
         val toggle = view.findViewById<View>(R.id.setting_auto_paste) as MaterialSwitch
+        toggle.isChecked = currentValue
+        return view
+    }
+
+    private fun getTapToSearchToggleView(convertView: View?, parent: ViewGroup): View {
+        val view: View
+        val inflater = parent.context
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val app = context!!.application as Application
+        if (convertView != null) {
+            view = convertView
+        } else {
+            view = inflater.inflate(
+                R.layout.settings_tap_to_search, parent,
+                false
+            )
+            val toggle = view.findViewById<View>(R.id.setting_tap_to_search) as MaterialSwitch
+            toggle.setOnClickListener {
+                val currentValue = app.tapToSearch()
+                val newValue = !currentValue
+                app.setTapToSearch(newValue)
+                toggle.isChecked = newValue
+            }
+        }
+        val currentValue = app.autoPaste()
+        val toggle = view.findViewById<View>(R.id.setting_tap_to_search) as MaterialSwitch
         toggle.isChecked = currentValue
         return view
     }
@@ -339,7 +365,7 @@ class SettingsListAdapter internal constructor(private val fragment: Fragment) :
                 Log.d("Settings", "Remote content: $value")
                 if (value != null) {
                     editor.putString(ArticleWebView.PREF_REMOTE_CONTENT, value)
-                    editor.commit()
+                    editor.apply()
                 }
             }
             val btnAlways = view
@@ -430,9 +456,10 @@ class SettingsListAdapter internal constructor(private val fragment: Fragment) :
         const val POS_REMOTE_CONTENT: Int = 1
         const val POS_FAV_RANDOM: Int = 2
         const val POS_USE_VOLUME_FOR_NAV: Int = 3
-        const val POS_AUTO_PASTE: Int = 4
-        const val POS_USER_STYLES: Int = 5
-        const val POS_CLEAR_CACHE: Int = 6
-        const val POS_ABOUT: Int = 7
+        const val POS_TAPTOSEACH: Int = 4
+        const val POS_AUTO_PASTE: Int = 5
+        const val POS_USER_STYLES: Int = 6
+        const val POS_CLEAR_CACHE: Int = 7
+        const val POS_ABOUT: Int = 8
     }
 }
