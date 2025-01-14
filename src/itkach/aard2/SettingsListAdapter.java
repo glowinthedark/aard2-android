@@ -7,10 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,9 +21,12 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 
 public class SettingsListAdapter extends BaseAdapter implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -44,13 +44,14 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
 
 
     final static int POS_UI_THEME = 0;
-    final static int POS_REMOTE_CONTENT = 1;
-    final static int POS_FAV_RANDOM = 2;
-    final static int POS_USE_VOLUME_FOR_NAV = 3;
-    final static int POS_AUTO_PASTE = 4;
-    final static int POS_USER_STYLES = 5;
-    final static int POS_CLEAR_CACHE = 6;
-    final static int POS_ABOUT = 7;
+    final static int POS_TAP_TO_SEACH = 1;
+    final static int POS_REMOTE_CONTENT = 2;
+    final static int POS_FAV_RANDOM = 3;
+    final static int POS_USE_VOLUME_FOR_NAV = 4;
+    final static int POS_AUTO_PASTE = 5;
+    final static int POS_USER_STYLES = 6;
+    final static int POS_CLEAR_CACHE = 7;
+    final static int POS_ABOUT = 8;
 
     SettingsListAdapter(Fragment fragment) {
         this.fragment = fragment;
@@ -71,7 +72,7 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
 
     @Override
     public int getCount() {
-        return 8;
+        return 9;
     }
 
     @Override
@@ -98,6 +99,7 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
     public View getView(int i, View convertView, ViewGroup parent) {
         switch (i) {
             case POS_UI_THEME: return getUIThemeSettingsView(convertView, parent);
+            case POS_TAP_TO_SEACH: return getTapToSearchSettingsView(convertView, parent);
             case POS_REMOTE_CONTENT: return getRemoteContentSettingsView(convertView, parent);
             case POS_FAV_RANDOM: return getFavRandomSwitchView(convertView, parent);
             case POS_USE_VOLUME_FOR_NAV: return getUseVolumeForNavView(convertView, parent);
@@ -123,7 +125,7 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
             final SharedPreferences prefs = app.prefs();
 
             String currentValue = prefs.getString(Application.PREF_UI_THEME,
-                    Application.PREF_UI_THEME_LIGHT);
+                    Application.PREF_UI_THEME_SYSTEM);
             Log.d("Settings", Application.PREF_UI_THEME + " current value: " + currentValue);
 
             View.OnClickListener clickListener = new View.OnClickListener() {
@@ -132,6 +134,9 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
                     SharedPreferences.Editor editor = prefs.edit();
                     String value = null;
                     switch(view.getId()) {
+                        case R.id.setting_ui_theme_system:
+                            value = Application.PREF_UI_THEME_SYSTEM;
+                            break;
                         case R.id.setting_ui_theme_light:
                             value = Application.PREF_UI_THEME_LIGHT;
                             break;
@@ -147,12 +152,13 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
                     context.recreate();
                 }
             };
-            RadioButton btnLight = (RadioButton) view
-                    .findViewById(R.id.setting_ui_theme_light);
-            RadioButton btnDark = (RadioButton) view
-                    .findViewById(R.id.setting_ui_theme_dark);
+            RadioButton btnSystem = view.findViewById(R.id.setting_ui_theme_system);
+            RadioButton btnLight = view.findViewById(R.id.setting_ui_theme_light);
+            RadioButton btnDark = view.findViewById(R.id.setting_ui_theme_dark);
             btnLight.setOnClickListener(clickListener);
             btnDark.setOnClickListener(clickListener);
+            btnSystem.setOnClickListener(clickListener);
+            btnSystem.setChecked(currentValue.equals(Application.PREF_UI_THEME_SYSTEM));
             btnLight.setChecked(currentValue.equals(Application.PREF_UI_THEME_LIGHT));
             btnDark.setChecked(currentValue.equals(Application.PREF_UI_THEME_DARK));
         };
@@ -239,6 +245,34 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
         }
         boolean currentValue = app.autoPaste();
         CheckedTextView toggle = (CheckedTextView)view.findViewById(R.id.setting_auto_paste);
+        toggle.setChecked(currentValue);
+        return view;
+    }
+
+    private View getTapToSearchSettingsView(View convertView, ViewGroup parent) {
+        View view;
+        LayoutInflater inflater = (LayoutInflater) parent.getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final Application app = (Application)context.getApplication();
+        if (convertView != null) {
+            view = convertView;
+        }
+        else {
+            view = inflater.inflate(R.layout.settings_tap_to_search, parent,
+                    false);
+            final CheckedTextView toggle = (CheckedTextView)view.findViewById(R.id.setting_tap_to_search);
+            toggle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean currentValue = app.isTapToSearchEnabled();
+                    boolean newValue = !currentValue;
+                    app.setSetTapToSearchEnabled(newValue);
+                    toggle.setChecked(newValue);
+                }
+            });
+        }
+        boolean currentValue = app.autoPaste();
+        CheckedTextView toggle = (CheckedTextView)view.findViewById(R.id.setting_tap_to_search);
         toggle.setChecked(currentValue);
         return view;
     }
@@ -447,16 +481,11 @@ public class SettingsListAdapter extends BaseAdapter implements SharedPreference
             });
             licenseView.setText(Html.fromHtml(license.trim()));
 
-            PackageManager manager = context.getPackageManager();
-            String versionName;
-            try {
-                PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
-                versionName = info.versionName;
-            } catch (PackageManager.NameNotFoundException e) {
-                versionName = "?";
-            }
 
-            String version = context.getString(R.string.application_version, versionName);
+            String version = context.getString(R.string.application_version, BuildConfig.VERSION_NAME)
+                    + "<br>type: " + BuildConfig.BUILD_TYPE
+                                     + "<br>codever: "             + BuildConfig.VERSION_CODE
+                                     + "<br>appid: " + BuildConfig.APPLICATION_ID;
             TextView versionView = (TextView)view.findViewById(R.id.application_version);
             versionView.setText(Html.fromHtml(version));
 

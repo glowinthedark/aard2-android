@@ -6,19 +6,20 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.webkit.WebView;
+
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -67,14 +68,17 @@ public class Application extends android.app.Application {
     static String jsUserStyle;
     static String jsClearUserStyle;
     static String jsSetCannedStyle;
+    static String jsTapToSearch;
 
     private static final String PREF                    = "app";
     static final String PREF_RANDOM_FAV_LOOKUP          = "onlyFavDictsForRandomLookup";
     static final String PREF_UI_THEME                   = "UITheme";
+    static final String PREF_UI_THEME_SYSTEM            = "system";
     static final String PREF_UI_THEME_LIGHT             = "light";
     static final String PREF_UI_THEME_DARK              = "dark";
     static final String PREF_USE_VOLUME_FOR_NAV         = "useVolumeForNav";
     static final String PREF_AUTO_PASTE                 = "autoPaste";
+    static final String PREF_TAP_TO_SEARCH               = "tapToSearch";
 
     private static final String TAG = Application.class.getSimpleName();
 
@@ -123,6 +127,9 @@ public class Application extends android.app.Application {
             jsClearUserStyle = readTextFile(is, 0);
             is = getAssets().open("setcannedstyle.js");
             jsSetCannedStyle = readTextFile(is, 0);
+            is = getAssets().open("taptosearch.js");
+            jsTapToSearch = readTextFile(is, 0);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -238,17 +245,31 @@ public class Application extends android.app.Application {
 
     String getPreferredTheme() {
         return prefs().getString(Application.PREF_UI_THEME,
-                Application.PREF_UI_THEME_LIGHT);
+                Application.PREF_UI_THEME_SYSTEM);
     }
 
     void installTheme(Activity activity) {
         String theme = getPreferredTheme();
-        if (theme.equals(PREF_UI_THEME_DARK)) {
+        if (PREF_UI_THEME_DARK.equals(theme)) {
             activity.setTheme(android.R.style.Theme_Holo);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
-        else {
+        else if (PREF_UI_THEME_LIGHT.equals(theme)) {
             activity.setTheme(android.R.style.Theme_Holo_Light_DarkActionBar);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        } else if (PREF_UI_THEME_SYSTEM.equals(theme)) {
+            if (isSystemUsingDarkTheme(getResources())) {
+                activity.setTheme(android.R.style.Theme_Holo);
+            } else {
+                activity.setTheme(android.R.style.Theme_Holo_Light_DarkActionBar);
+            }
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         }
+    }
+
+    public  boolean isSystemUsingDarkTheme(Resources resources) {
+        int currentNightMode = resources.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
     void push(Activity activity) {
@@ -347,14 +368,21 @@ public class Application extends android.app.Application {
         final SharedPreferences prefs = prefs();
         return prefs.getBoolean(Application.PREF_AUTO_PASTE, false);
     }
-
     void setAutoPaste(boolean value) {
         final SharedPreferences prefs = prefs();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(Application.PREF_AUTO_PASTE, value);
-        editor.commit();
+        editor.apply();
     }
 
+    boolean isTapToSearchEnabled() {
+        final SharedPreferences prefs = prefs();
+        return prefs.getBoolean(Application.PREF_TAP_TO_SEARCH, false);
+    }
+
+    void setSetTapToSearchEnabled(boolean value) {
+        prefs().edit().putBoolean(Application.PREF_TAP_TO_SEARCH, value).apply();
+    }
 
     String getUrl(Blob blob) {
         return String.format(CONTENT_URL_TEMPLATE,

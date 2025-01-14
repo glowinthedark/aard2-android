@@ -1,5 +1,6 @@
 package itkach.aard2;
 
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -8,7 +9,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.net.Uri;
-import android.support.v4.provider.DocumentFile;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +22,9 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import static java.lang.String.format;
+
+import androidx.documentfile.provider.DocumentFile;
+
 
 public class DictionaryListAdapter extends BaseAdapter {
 

@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application' version '7.4.2'
+    id 'com.android.application' version '8.7.3'
 }
 
 repositories {
@@ -11,7 +11,6 @@ repositories {
 }
 
 android {
-    compileSdkVersion 31
 
     packagingOptions {
         exclude 'META-INF/LICENSE'
@@ -48,31 +47,72 @@ android {
                 if (keyPassword == null) {
                     keyPassword = storePassword
                 }
-                keyAlias "aard2-android"
+                keyAlias System.getenv("KEY_ALIAS")
+            }
+
+            debug {
+                storeFile file(System.getenv("KEYSTORE"))
+                storePassword System.getenv("STORE_PASSWORD")
+                keyPassword System.getenv("KEY_PASSWORD")
+                if (keyPassword == null) {
+                    keyPassword = storePassword
+                }
+                keyAlias System.getenv("KEY_ALIAS")
             }
         }
     }
 
     buildTypes {
-        if (System.getenv("KEYSTORE") != null) {
-            release {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules-release.pro'
+            if (System.getenv("KEYSTORE") != null) {
                 signingConfig signingConfigs.release
             }
         }
     }
 
     defaultConfig {
-        minSdkVersion 19
+        namespace "itkach.aard2"
+        applicationId "com.legbehindneck.aard2"
+        minSdkVersion 21
         targetSdkVersion 34
+        compileSdk 34
+        applicationIdSuffix 'darkmod'
+        versionName "12.1223.14"
+        versionCode  64
+        setProperty("archivesBaseName", "aard25-" + versionCode + "-" + applicationIdSuffix)
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    compileSdk 34
+    buildToolsVersion '34.0.0'
 
 }
 
 dependencies {
-    api 'com.fasterxml.jackson.core:jackson-databind:2.4+'
-    api 'com.fasterxml.jackson.core:jackson-core:2.4+'
-    api 'com.fasterxml.jackson.core:jackson-annotations:2.4+'
+    api 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    api 'com.fasterxml.jackson.core:jackson-core:2.18.2'
+    api 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
     api 'com.github.kazy1991:FontDrawable:0.9.5'
+    implementation 'androidx.webkit:webkit:1.12.1'
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.viewpager2:viewpager2:1.1.0"
     api project(':slobj')
     api project(':slobber')
+    implementation 'androidx.documentfile:documentfile:1.0.1'
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
+
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+        }
+    }
 }

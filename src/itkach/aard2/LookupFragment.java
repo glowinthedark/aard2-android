@@ -16,6 +16,7 @@ import android.widget.TextView;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
 public class LookupFragment extends BaseListFragment implements LookupListener {
 
     private Timer       timer;

@@ -1,7 +1,6 @@
 package itkach.aard2;
 
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.text.method.LinkMovementMethod;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -14,6 +13,9 @@ import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.fragment.app.ListFragment;
+
 
 
 public abstract class BaseListFragment extends ListFragment {

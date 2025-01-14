@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Aard 2</string>
+    <string name="app_name">Aard25</string>
     <string name="subtitle_lookup">Lookup</string>
     <string name="subtitle_bookmark">Bookmarks</string>
     <string name="subtitle_history">History</string>
@@ -50,7 +50,7 @@
             <a href="%1$s">%2$s</a>
         ]]>
     </string>
-    <string name="application_version">Version %1$s</string>
+    <string name="application_version">ver: %1$s</string>
     <string name="setting_clear_cache">Clear Cache</string>
     <string name="setting_clear_cache_subtitle">Delete cached content including remote images</string>
     <string name="confirm_clear_cached_content">Clear cached content?</string>
@@ -104,6 +104,7 @@
     <string name="setting_ui_theme">User Interface Style</string>
     <string name="setting_ui_theme_light">Light</string>
     <string name="setting_ui_theme_dark">Dark</string>
+    <string name="setting_ui_theme_system" translatable="false">System</string>
     <string name="action_load_remote_content">Load Remote Content</string>
     <string name="auto_style_title">Auto</string>
     <string name="action_fullscreen">Full Screen</string>
@@ -112,4 +113,5 @@
     <string name="find_hint">Find in page</string>
     <string name="find_next">Next</string>
     <string name="find_previous">Previous</string>
+    <string name="setting_tap_to_search">Tap to search</string>
 </resources>

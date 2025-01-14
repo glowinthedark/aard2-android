@@ -10,15 +10,6 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.NavUtils;
-import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.view.PagerTitleStrip;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -34,6 +25,15 @@ import java.util.List;
 
 import itkach.slob.Slob;
 import itkach.slob.Slob.Blob;
+
+import androidx.core.app.NavUtils;
+import androidx.core.app.TaskStackBuilder;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.PagerTitleStrip;
+import androidx.viewpager.widget.ViewPager;
 
 public class ArticleCollectionActivity extends FragmentActivity
         implements  View.OnSystemUiVisibilityChangeListener,
@@ -160,7 +160,7 @@ public class ArticleCollectionActivity extends FragmentActivity
 
                 viewPager = (ViewPager) findViewById(R.id.pager);
                 viewPager.setAdapter(articleCollectionPagerAdapter);
-                viewPager.setOnPageChangeListener(new OnPageChangeListener(){
+                viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener(){
 
                     @Override
                     public void onPageScrollStateChanged(int arg0) {}

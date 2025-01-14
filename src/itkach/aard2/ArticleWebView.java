@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +20,11 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -32,6 +39,7 @@ import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
+
 
 public class ArticleWebView extends SearchableWebView {
 
@@ -100,6 +108,21 @@ public class ArticleWebView extends SearchableWebView {
         }
     }
 
+    @JavascriptInterface
+    public void onWordTapped(String tappedWord) {
+        Log.d(TAG, "Word tapped: " + tappedWord);
+
+        if (!TextUtils.isEmpty(tappedWord) && tappedWord.length() > 1) {
+            Activity activity = (Activity) getContext();
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    Toast.makeText(activity, "Look up: " + tappedWord, Toast.LENGTH_SHORT).show();
+                    getApplication().lookup(tappedWord, false);
+                });
+            }
+        }
+    }
+
     public ArticleWebView(Context context) {
         this(context, null);
     }
@@ -117,6 +140,19 @@ public class ArticleWebView extends SearchableWebView {
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
 
+        if (this.isUIDark()) {
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true);
+            } else {
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                    int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+                    if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+                        //Theme is switched to Night/Dark mode, turn on webview darkening
+                        WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON);
+                    }
+                }
+            }
+        }
         Resources r = getResources();
         defaultStyleTitle = r.getString(R.string.default_style_title);
         autoStyleTitle = r.getString(R.string.auto_style_title);
@@ -195,6 +231,10 @@ public class ArticleWebView extends SearchableWebView {
                 view.loadUrl("javascript:" + styleSwitcherJs +
                         ";$SLOB.setStyleTitles($styleSwitcher.getTitles())");
                 applyStylePref();
+
+                if (getApplication().isTapToSearchEnabled()) {
+                    view.loadUrl("javascript:" + Application.jsTapToSearch);
+                }
             }
 
             @Override
@@ -331,7 +371,7 @@ public class ArticleWebView extends SearchableWebView {
     private boolean isUIDark() {
         Application app = getApplication();
         String uiTheme = app.getPreferredTheme();
-        return uiTheme.equals(Application.PREF_UI_THEME_DARK);
+        return Application.PREF_UI_THEME_DARK.equals(uiTheme) || ( Application.PREF_UI_THEME_SYSTEM.equals(uiTheme) && app.isSystemUsingDarkTheme(getResources()));
     }
 
     private String getAutoStyle() {
